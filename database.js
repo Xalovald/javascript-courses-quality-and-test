@@ -17,21 +17,29 @@ const createTables = () => {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
                 score INTEGER,
-                letters_tried TEXT,
                 game_date TEXT
             )
-        `);
-        console.log("Players table created or already exists");
+        `, (err) => {
+            if (err) {
+                console.error("Failed to create players table", err);
+            } else {
+                console.log("Players table created or already exists");
+            }
+        });
 
         db.run(`
             CREATE TABLE IF NOT EXISTS game_state (
                 id INTEGER PRIMARY KEY,
                 score INTEGER
             )
-        `);
-        console.log("Game state table created or already exists");
-        
-        insertInitialscore(); // Insérer le score initial si nécessaire
+        `, (err) => {
+            if (err) {
+                console.error("Failed to create game_state table", err);
+            } else {
+                console.log("Game state table created or already exists");
+                insertInitialscore(); // Insérer le score initial si nécessaire
+            }
+        });
     });
 };
 
@@ -47,22 +55,24 @@ const insertInitialscore = () => {
 };
 
 // Sauvegarder les données du joueur
-const savePlayerData = (playerName, score, lettersTried, gameDate) => {
+const savePlayerData = (playerName, score, gameDate) => {
     return new Promise((resolve, reject) => {
-        db.run(`INSERT INTO players (name, score, letters_tried, game_date)
-            VALUES (?, ?, ?, ?)`,
-            [playerName, score, lettersTried, gameDate], function(err) {
-                if (err) {
-                    console.error("Failed to insert player data", err);
-                    reject(err);
-                } else {
-                    console.log(`Player data saved with ID: ${this.lastID}`);
-                    resolve(this.lastID); // Resolve with the last ID
-                }
-            });
+        db.run(`
+            INSERT INTO players (name, score, game_date) 
+            VALUES (?, ?, ?)
+        `, [playerName, score, gameDate], function(err) {
+            if (err) {
+                console.error("Failed to insert player data", err);
+                reject(err); // Gestion d'erreur si l'insertion échoue
+            } else {
+                console.log(`Player data saved with ID: ${this.lastID}`);
+                resolve(this.lastID); // Résoudre avec l'ID du joueur inséré
+            }
+        });
     });
 };
 
+// Sauvegarder le pseudo du joueur
 const saveUsername = (req, res) => {
     const username = req.body.name; // Le pseudo
     const score = req.body.score; // Le score
@@ -83,7 +93,6 @@ const saveUsername = (req, res) => {
     });
 };
 
-
 // Récupérer les données du joueur
 const getPlayerData = (playerName, callback) => {
     db.get(`
@@ -98,22 +107,33 @@ const getPlayerData = (playerName, callback) => {
     });
 };
 
-// Mettre à jour le score
-const updatescore = (score) => {
-    db.run(`UPDATE game_state SET score = ? WHERE id = 1`, [score], (err) => {
-        if (err) {
-            console.error("Failed to update score", err);
-        } else {
-            console.log(`score updated to: ${score}`);
-        }
-    });
+// Mettre à jour le score seulement si le joueur gagne
+const updatescore = (score, gameStatus) => {
+    if (gameStatus === 'win') {  // Vérifier si le joueur a gagné
+        db.run(`
+            UPDATE game_state SET score = ? WHERE id = 1
+        `, [score], (err) => {
+            if (err) {
+                console.error("Failed to update score", err);
+            } else {
+                console.log(`Score updated to: ${score}`);
+            }
+        });
+    } else {
+        console.log("Game is not won, score not updated.");
+    }
 };
 
-// Get top players
+// Sauvegarder le score dans la base de données
+const savescoreToDB = (score) => {
+    console.log(`Saving score to DB: ${score}`); // Log du score pour vérification
+    updatescore(score, 'win'); // Mise à jour dans la base de données avec statut 'win'
+};
+
+// Récupérer les meilleurs joueurs
 const getTopPlayers = (callback) => {
     db.all(`
         SELECT name, score, game_date FROM players 
-        WHERE score BETWEEN 0 AND 1000 
         ORDER BY score DESC 
         LIMIT 1000
     `, [], (err, rows) => {
@@ -121,7 +141,7 @@ const getTopPlayers = (callback) => {
             console.error("Error retrieving top players", err);
             callback([]);
         } else {
-            callback(rows);
+            callback(rows); // Renvoie les joueurs récupérés
         }
     });
 };
@@ -129,7 +149,8 @@ const getTopPlayers = (callback) => {
 module.exports = {
     savePlayerData,
     getPlayerData,
-    updatescore,
-    saveUsername, // Add the new function to the exports
-    getTopPlayers  // Add the new function to the exports
+    updatescore,  // Mise à jour de la fonction updateScore avec gameStatus
+    saveUsername,
+    getTopPlayers,
+    savescoreToDB
 };

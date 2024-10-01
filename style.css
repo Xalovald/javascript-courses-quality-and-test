@@ -1,113 +1,112 @@
-        /* General body styling */
-        body {
-            background-color: #f9f6f1;
-            font-family: 'Georgia', serif;
-            color: #3b3b3b;
-            margin: 0;
-            padding: 20px;
-            font-size: 18px;
-            line-height: 1.6;
-            text-align: center;
-        }
+body {
+    background-color: #f9f6f1;
+    font-family: 'Georgia', serif;
+    color: #3b3b3b;
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: center;
+}
 
-        /* Container styling */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #d8c3a5;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
+/* Container styling */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #d8c3a5;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
 
-        /* Main title */
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            color: #6d4c41;
-            text-shadow: 2px 2px #e4dfda;
-        }
+/* Main title */
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #6d4c41;
+    text-shadow: 2px 2px #e4dfda;
+}
 
-        /* Game status messages */
-        h2 {
-            font-size: 1.8em;
-            color: #7b6a58;
-            margin-bottom: 30px;
-        }
+/* Game status messages */
+h2 {
+    font-size: 1.8em;
+    color: #7b6a58;
+    margin-bottom: 30px;
+}
 
-        /* Congratulatory message */
-        h2:has(.win) {
-            color: #4a7c59;
-        }
+/* Congratulatory message */
+h2:has(.win) {
+    color: #4a7c59;
+}
 
-        /* Legend styling */
-        legend {
-            font-size: 1.5em;
-            color: #5c4033;
-            padding: 5px 10px;
-            border-bottom: 2px solid #d8c3a5;
-            margin-bottom: 15px;
-            background-color: #f4e4c1;
-            border-radius: 5px;
-        }
+/* Legend styling */
+legend {
+    font-size: 1.5em;
+    color: #5c4033;
+    padding: 5px 10px;
+    border-bottom: 2px solid #d8c3a5;
+    margin-bottom: 15px;
+    background-color: #f4e4c1;
+    border-radius: 5px;
+}
 
-        /* Form input fields */
-        .uk-input {
-            font-size: 1.2em;
-            padding: 10px;
-            border: 1px solid #d8c3a5;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-            background-color: #fff8e1;
-        }
+/* Form input fields */
+.uk-input {
+    font-size: 1.2em;
+    padding: 10px;
+    border: 1px solid #d8c3a5;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff8e1;
+}
 
-        /* Button styling */
-        .uk-button-secondary {
-            font-size: 1.2em;
-            color: #fff;
-            background-color: #6d4c41;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            text-align: center; /* Center the text horizontally */
-    display: inline-flex; /* Use flexbox for proper alignment */
-    justify-content: center; /* Center content horizontally */
-    align-items: center; /* Center content vertically */
-        }
+/* Button styling */
+.uk-button-secondary {
+    font-size: 1.2em;
+    color: #fff;
+    background-color: #6d4c41;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center; /* Center the text horizontally */
+display: inline-flex; /* Use flexbox for proper alignment */
+justify-content: center; /* Center content horizontally */
+align-items: center; /* Center content vertically */
+}
 
-        .uk-button-secondary:hover {
-            background-color: #5c4033;
-        }
+.uk-button-secondary:hover {
+    background-color: #5c4033;
+}
 
-        /* Remaining attempts and score styling */
-        #score {
-            font-weight: bold;
-            color: #b5651d;
-        }
+/* Remaining attempts and score styling */
+#score {
+    font-weight: bold;
+    color: #b5651d;
+}
 
-        /* Additional styling */
-        h3 {
-            font-size: 1.5em;
-            color: #6d4c41;
-            margin-top: 30px;
-        }
+/* Additional styling */
+h3 {
+    font-size: 1.5em;
+    color: #6d4c41;
+    margin-top: 30px;
+}
 
-        /* Media queries for responsive design */
-        @media (max-width: 600px) {
-            body {
-                font-size: 16px;
-            }
+/* Media queries for responsive design */
+@media (max-width: 600px) {
+    body {
+        font-size: 16px;
+    }
 
-            h1 {
-                font-size: 2em;
-            }
+    h1 {
+        font-size: 2em;
+    }
 
-            .container {
-                padding: 15px;
-            }
-        }
+    .container {
+        padding: 15px;
+    }
+}

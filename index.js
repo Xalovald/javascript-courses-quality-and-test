@@ -108,7 +108,6 @@ app.get('/player/:name', (req, res) => {
             res.render('pages/player', {
                 name: data.name,
                 score: data.score,
-                lettersTried: data.letters_tried,
                 gameDate: data.game_date
             });
         } else {
@@ -118,18 +117,18 @@ app.get('/player/:name', (req, res) => {
 });
 
 app.post('/save-username', (req, res) => {
-    const username = req.body.name; // Get the username from the form
-    const score = req.body.score; // Get the score from the form; ensure this is sent from the client
-    const game_date = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
+    const username = req.body.name;  // Récupérer le nom d'utilisateur
+    const score = req.body.score;    // Récupérer le score
+    const game_date = new Date().toISOString().split('T')[0]; // Date actuelle
 
-    // Call the saveUsername function
-    savePlayerData(username, score, "", game_date) // Pass empty string for letters_tried or modify accordingly
+    // Appeler la fonction pour sauvegarder les données du joueur
+    savePlayerData(username, score, game_date)
         .then(() => {
-            res.redirect('/'); // Redirect to the main page after saving
+            res.redirect('/');
         })
         .catch(err => {
-            console.error("Error saving username:", err);
-            res.status(500).send('Error saving username');
+            console.error("Error saving username and score:", err);
+            res.status(500).send('Error saving username and score');
         });
 });
 
@@ -137,7 +136,13 @@ app.post('/save-username', (req, res) => {
 // Route to get top players
 app.get('/top-players', (req, res) => {
     getTopPlayers((players) => {
-        res.json(players); // Send the top players as JSON response
+        if (players) {
+            console.log('Top players:', players); // Log des joueurs récupérés
+            res.json(players); // Renvoie les joueurs sous forme de JSON
+        } else {
+            console.error('Erreur lors de la récupération des joueurs');
+            res.status(500).send('Erreur lors de la récupération des meilleurs joueurs.');
+        }
     });
 });
 

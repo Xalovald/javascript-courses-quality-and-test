@@ -123,25 +123,28 @@ class Game {
             const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
             this.score = this.initialscore - elapsedTime;
     
-            // Mettre à jour le score dans la base de données
-            updatescore(this.score);
-    
             // Vérifiez l'état du jeu à chaque intervalle
             const status = this.checkGameStatus();
             
-            if (status === 'win' || status === 'lose') {
+            if (status === 'win') {
+                // Mettre à jour le score dans la base de données uniquement si le joueur a gagné
+                updatescore(this.score, status);
                 clearInterval(this.scoreIntervalId); // Stop the score
-                this.score = 0; // Set the score to 0
-                this.isGameOver = true; // Ensure the game is marked as over
-                console.log(`Game ${status}! score stopped.`);
+                this.isGameOver = true; // Mark the game as over
+                console.log("Game won! Score saved and timer stopped.");
+            } else if (status === 'lose') {
+                clearInterval(this.scoreIntervalId); // Stop the score
+                this.isGameOver = true; // Mark the game as over
+                console.log("Game lost! Timer stopped.");
             } else if (this.score <= 0) {
                 this.score = 0;
                 clearInterval(this.scoreIntervalId);
                 this.isGameOver = true;
-                console.log("score finished! You cannot play until the next day.");
+                console.log("Score finished! You cannot play until the next day.");
             }
         }, 1000);
     }
+    
 
 
     getscore() {

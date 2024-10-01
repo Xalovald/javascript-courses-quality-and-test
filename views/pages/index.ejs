@@ -1,121 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap" rel="stylesheet">
     <%- include('../partials/head'); %>
     <style>
-        /* General body styling */
-        body {
-            background-color: #f9f6f1;
-            font-family: 'Georgia', serif;
-            color: #3b3b3b;
-            margin: 0;
-            padding: 20px;
-            font-size: 18px;
-            line-height: 1.6;
-            text-align: center;
-        }
+body {
+    background-color: #f4f0e7; /* Soft beige background reminiscent of ancient stone */
+    font-family: 'Cinzel', serif;
+    color: #4a4a4a; /* Dark gray for readability */
+    margin: 0;
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: center; /* Centering text for a more formal look */
+}
 
-        /* Container styling */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #d8c3a5;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
+/* Container styling */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff; /* White background for the content area */
+    border: 2px solid #c0b28a; /* Light beige border */
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    border-radius: 10px; /* Rounded corners */
+}
 
-        /* Main title */
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            color: #6d4c41;
-            text-shadow: 2px 2px #e4dfda;
-        }
+/* Main title */
+h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3em; /* Larger font size for prominence */
+    margin-bottom: 10px;
+    color: #8a5a3d; /* Earthy brown color */
+    text-shadow: 1px 1px #eae4d3; /* Light shadow for an ancient stone effect */
+}
 
-        /* Game status messages */
-        h2 {
-            font-size: 1.8em;
-            color: #7b6a58;
-            margin-bottom: 30px;
-        }
+/* Sub-title */
+h2 {
+    font-size: 2em;
+    color: #7b6a58; /* Softer brown color */
+    margin-bottom: 20px;
+}
 
-        /* Congratulatory message */
-        h2:has(.win) {
-            color: #4a7c59;
-        }
+/* Legend styling */
+legend {
+    font-size: 1.5em;
+    color: #5c4033; /* Dark brown for legend text */
+    padding: 5px 10px;
+    border-bottom: 2px solid #d8c3a5; /* Border to give a carved effect */
+    margin-bottom: 15px;
+    background-color: #f4e4c1; /* Light cream background for legends */
+    border-radius: 5px;
+}
 
-        /* Legend styling */
-        legend {
-            font-size: 1.5em;
-            color: #5c4033;
-            padding: 5px 10px;
-            border-bottom: 2px solid #d8c3a5;
-            margin-bottom: 15px;
-            background-color: #f4e4c1;
-            border-radius: 5px;
-        }
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Merge borders */
+    margin-top: 20px;
+}
 
-        /* Form input fields */
-        .uk-input {
-            font-size: 1.2em;
-            padding: 10px;
-            border: 1px solid #d8c3a5;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-            background-color: #fff8e1;
-        }
+/* Table headers and cells */
+th, td {
+    padding: 10px;
+    border: 1px solid #d8c3a5; /* Light border for table cells */
+    text-align: center;
+    background-color: #ffffff; /* White background for cells */
+}
 
-        /* Button styling */
-        .uk-button-secondary {
-            font-size: 1.2em;
-            color: #fff;
-            background-color: #6d4c41;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            text-align: center; /* Center the text horizontally */
-    display: inline-flex; /* Use flexbox for proper alignment */
-    justify-content: center; /* Center content horizontally */
-    align-items: center; /* Center content vertically */
-        }
+/* Table header styling */
+th {
+    background-color: #eae6db; /* Light grey for headers */
+    color: #6d4c41; /* Header text color */
+    font-weight: bold;
+}
 
-        .uk-button-secondary:hover {
-            background-color: #5c4033;
-        }
+/* Button styling */
+.uk-button-secondary {
+    font-size: 1.2em;
+    color: #fff;
+    background-color: #8a5a3d; /* Earthy button color */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-        /* Remaining attempts and score styling */
-        #score {
-            font-weight: bold;
-            color: #b5651d;
-        }
+.uk-button-secondary:hover {
+    background-color: #7b6a58; /* Darken button on hover */
+}
 
-        /* Additional styling */
-        h3 {
-            font-size: 1.5em;
-            color: #6d4c41;
-            margin-top: 30px;
-        }
+/* Additional headings styling */
+h3 {
+    font-size: 1.5em;
+    color: #6d4c41; /* Earthy tone for subheadings */
+    margin-top: 30px;
+}
 
-        /* Media queries for responsive design */
-        @media (max-width: 600px) {
-            body {
-                font-size: 16px;
-            }
+/* Footer styling */
+footer {
+    margin-top: 30px;
+    font-size: 1em;
+}
 
-            h1 {
-                font-size: 2em;
-            }
+/* Modal styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4);
+}
 
-            .container {
-                padding: 15px;
-            }
-        }
+/* Modal content */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* Close button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 600px) {
+    body {
+        font-size: 16px; 
+    }
+
+    h1 {
+        font-size: 2.5em; 
+    }
+
+    .container {
+        padding: 15px; 
+    }
+}
     </style>
 </head>
 
@@ -124,12 +165,13 @@
 <main>
     <div id="gameStatus">
         <% if (status === 'win') { %>
-            <form id="username-form" action="/save-username" method="POST">
-                <label for="username">Entrez votre pseudo :</label>
-                <input type="text" id="username" name="name" required>
-                <button type="submit">Sauvegarder</button>
+            <form action="/save-username" method="POST" id="usernameForm">
+                <input type="text" name="name" placeholder="Enter your name" required>
+                <input type="hidden" id="scoreField" name="score" required>
+                <input type="hidden" id="dateField" name="game_date" required>
+                <button class="uk-button-secondary" type="submit">Save</button>
             </form>
-            
+                        
             <h2>Félicitations ! Vous avez trouvé le mot : <%= word %> 🎉</br> Votre score est de : <%= score %></h2>
         <% } else if (status === 'lose') { %>
             <h2>Désolé, vous avez perdu. Le mot était : <%= word %> 😢</h2>
@@ -158,9 +200,7 @@
                 </fieldset>
             </form>
         <% } %>
-        <!-- Show the top players button only on win -->
         <button id="showTopPlayers" class="uk-button uk-button-default">Afficher les meilleurs joueurs</button>
-            
     </div>
     
     <% if (game) { %>
@@ -191,7 +231,16 @@
     </div>
 </div>
 </main>
-<script src="/js/score.js"></script>
+<script>
+    // Remplir automatiquement le score et la date avant l'envoi du formulaire
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentScore = <%= score %>; // Insérer le score actuel (assurez-vous que cela fonctionne bien côté serveur)
+        const currentDate = new Date().toISOString().split('T')[0]; // Date au format YYYY-MM-DD
+
+        document.getElementById('scoreField').value = currentScore; // Mettre à jour le champ score
+        document.getElementById('dateField').value = currentDate; // Mettre à jour le champ date
+    });
+</script>
 <script src="/js/status.js"></script>
 <script src="/js/topplayer.js"></script>
 </body>
