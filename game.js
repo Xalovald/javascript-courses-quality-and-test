@@ -145,8 +145,6 @@ class Game {
         }, 1000);
     }
     
-
-
     getscore() {
         return this.score;
     }

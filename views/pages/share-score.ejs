@@ -1,0 +1,54 @@
+<!-- share-score.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Score</title>
+    <style>
+        /* Optional styling for the modal */
+        #socialMediaModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000; /* Ensure it appears above other content */
+        }
+        
+        #socialMediaModal button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="socialMediaModal">
+        <h2>Share Your Score!</h2>
+        <p>Your score is: <span id="sharedScore"><%= score %></span></p>
+        <button id="facebookShareBtn">Share on Facebook</button>
+        <button id="linkedinShareBtn">Share on LinkedIn</button>
+        <button onclick="closeModal()">Close</button>
+    </div>
+
+    <script>
+        // Share functionality
+        const score = document.getElementById('sharedScore').innerText;
+
+        document.getElementById('facebookShareBtn').onclick = function() {
+            const url = `https://www.facebook.com/sharer/sharer.php?u=YOUR_URL&quote=I%20scored%20${score}!`;
+            window.open(url, '_blank');
+        };
+
+        document.getElementById('linkedinShareBtn').onclick = function() {
+            const url = `https://www.linkedin.com/sharing/share-offsite/?url=YOUR_URL&title=I%20scored%20${score}`;
+            window.open(url, '_blank');
+        };
+
+        function closeModal() {
+            window.location.href = '/'; // Redirect to the home page or wherever you want
+        }
+    </script>
+</body>
+</html>

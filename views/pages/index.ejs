@@ -191,7 +191,8 @@ footer {
                     <% } %>
                     
                     <div class="uk-margin">
-                        <input class="uk-input" type="text" name="word" placeholder="Tapez une lettre">
+                        <input class="uk-input" type="text" name="word" placeholder="Tapez une lettre" maxlength="1" id="lettersInput" oninput="validateInput()" pattern="[a-zA-Z]" title="entrer une lettre en a et z" required 
+                        autofocus>
                     </div>
     
                     <div class="uk-margin">
