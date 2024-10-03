@@ -206,8 +206,7 @@ footer {
                 <div class="modal-content">
                     <span class="close" id="closeModal">&times;</span>
                     <h2>Success!</h2>
-                    <p>Your score is: <span id="scoreInModal"></span></p>
-                    <button id="twitterShareBtn" class="uk-button uk-button-secondary" onclick="shareOnTwitter()">Partager sur Twitter</button>
+                    <button id="twitterBtn" class="uk-button uk-button-secondary" onclick="shareOnTwitter(event)">Partager sur Twitter</button>
 
                 </div>
             </div>
@@ -245,13 +244,15 @@ footer {
 </div>
 </main>
 <script>
-    // Remplir automatiquement le score et la date avant l'envoi du formulaire
-    document.addEventListener('DOMContentLoaded', () => {
-        const currentScore = <%= score %>; // Insérer le score actuel (assurez-vous que cela fonctionne bien côté serveur)
-        const currentDate = new Date().toISOString().split('T')[0]; // Date au format YYYY-MM-DD
+    let currentScore; // Declare currentScore in a broader scope
 
-        document.getElementById('scoreField').value = currentScore; // Mettre à jour le champ score
-        document.getElementById('dateField').value = currentDate; // Mettre à jour le champ date
+    // Automatically fill in the score and date before form submission
+    document.addEventListener('DOMContentLoaded', () => {
+        currentScore = <%= score %>; // Insert the current score (ensure this works server-side)
+        const currentDate = new Date().toISOString().split('T')[0]; // Date in YYYY-MM-DD format
+
+        document.getElementById('scoreField').value = currentScore; // Update score field
+        document.getElementById('dateField').value = currentDate; // Update date field
     });
 
     function getQueryParam(param) {
@@ -259,33 +260,34 @@ footer {
         return urlParams.get(param);
     }
 
-// Check if 'showModal' is in the URL
-if (getQueryParam('showModal') === 'true') {
-    const score = getQueryParam('score');
-    document.getElementById('scoreInModal').textContent = score;
+    // Check if 'showModal' is in the URL
+    if (getQueryParam('showModal') === 'true') {
 
-    // Show the modal
-    document.getElementById('intermediateModal').style.display = 'block';
-    document.getElementById('gameForm').style.display = 'none'; // Hide the form
-} else {
-    // Show the form and hide the modal
-    document.getElementById('gameForm').style.display = 'block';
-    document.getElementById('intermediateModal').style.display = 'none';
-}
+        // Show the modal
+        document.getElementById('intermediateModal').style.display = 'block';
+        document.getElementById('gameForm').style.display = 'none'; // Hide the form
+    } else {
+        // Show the form and hide the modal
+        document.getElementById('gameForm').style.display = 'block';
+        document.getElementById('intermediateModal').style.display = 'none';
+    }
 
-    window.shareOnTwitter = function() {
-        const tweetText = "J'ai gagné au jeu du Pendu avec un score de " + currentScore + " ! Pouvez-vous faire mieux ?";
+    // Share on Twitter function
+    window.shareOnTwitter = function(event) {
+        event.stopPropagation(); // Prevent event propagation to avoid closing the modal
+        const tweetText = "J'ai gagné au jeu du Pendu avec un score de " + (currentScore + 1) + " ! Pouvez-vous faire mieux ?";
         const tweetUrl = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetText);
         window.open(tweetUrl, '_blank'); // Open Twitter share dialog
     };
 
-// Close the modal when the close button is clicked
-document.getElementById('closeModal').addEventListener('click', function() {
-    document.getElementById('intermediateModal').style.display = 'none';
-    document.getElementById('gameForm').style.display = 'block'; // Show form again
-});
-
+    // Close the modal when the close button is clicked
+    document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('intermediateModal').style.display = 'none';
+        document.getElementById('gameForm').style.display = 'block'; // Show form again
+    });
 </script>
+
+
 <script src="/js/status.js"></script>
 <script src="/js/topplayer.js"></script>
 </body>
