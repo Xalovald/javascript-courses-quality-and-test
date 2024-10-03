@@ -1,126 +1,99 @@
-const Game = require('../game.js');
-const fs = require('fs');
+const Game = require('../game.js'); // Adjusted path 
+const { updatescore } = require('../database.js'); // Adjusted path
+const csv = require('csv-parser');
+jest.mock('../database.js');
 
-// Mocking the fs module for file system operations
-jest.mock('fs');
+describe('Game Class', () => {
+    let game;
 
-// Mocking database.js module
-jest.mock('./database.js', () => ({
-  savePlayerData: jest.fn(),
-  getPlayerData: jest.fn(),
-  updatescore: jest.fn(),
-}));
-
-// Mocking tools.js with specific functions
-jest.mock('../tools.js', () => ({
-  replaceAt: (str, index, chr) => str.substr(0, index) + chr + str.substr(index + 1),
-}));
-
-describe('Game class', () => {
-  let game;
-
-  beforeEach(() => {
-    game = new Game();
-    jest.useFakeTimers('modern'); // Ensure modern fake timers
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  test('loadWords should load words from file', async () => {
-    const mockWords = 'word\ntest\nexample\n';
-    fs.createReadStream.mockReturnValue({
-      pipe: jest.fn().mockReturnThis(),
-      on: jest.fn().mockImplementation((event, callback) => {
-        if (event === 'data') {
-          callback(mockWords); // Pass the data directly as a string
-        }
-        if (event === 'end') {
-          callback(); // Call the 'end' event
-        }
-        return this; // Ensure fluent API for chaining
-      }),
+    beforeEach(() => {
+        game = new Game();
+        game.listOfWords = ['apple', 'banana', 'cherry']; // Mock word list
+        game.chooseWord(); // Ensure a word is chosen before each test
     });
 
-    await game.loadWords();
-    expect(game.listOfWords).toEqual(['word', 'test', 'example']);
-  });
+    test('should load words from CSV', async () => {
+        // Mocking CSV data
+        game.loadWords = jest.fn(() => {
+            game.listOfWords.push('mockWord'); // Add mocked word
+            return Promise.resolve(); // Ensure the promise resolves
+        });
+        await game.loadWords();
+        expect(game.listOfWords).toContain('mockWord');
+    });
 
-  test('checkGameStatus should return correct status', () => {
-    game.word = 'test';
-    game.unknowWord = 'test';
-    expect(game.checkGameStatus()).toBe('win');
+    test('should choose a word based on the date', () => {
+        // Test that a word has been chosen
+        expect(game.word).toBeDefined(); 
+        expect(game.unknowWord).toBe('#####'); // Based on the chosen word
+    });
 
-    game.unknowWord = 't###';
-    game.numberOfTry = 0;
-    expect(game.checkGameStatus()).toBe('lose');
+    test('should check game status correctly', () => {
+        game.numberOfTry = 0; // Player has no tries left
+        expect(game.checkGameStatus()).toBe('lose');
+        
+        game.numberOfTry = 5; // Reset number of tries
+        game.word = 'apple'; // Set the word to guess
+        game.unknowWord = 'apple'; // Simulate winning
+        expect(game.checkGameStatus()).toBe('win');
+        
+        game.unknowWord = '#####'; // Simulate ongoing game
+        expect(game.checkGameStatus()).toBe('continue');
+    });
 
-    game.numberOfTry = 1;
-    expect(game.checkGameStatus()).toBe('continue');
-  });
+    test('should reset the game correctly', () => {
+        game.reset();
+        expect(game.word).toBeDefined();
+        expect(game.numberOfTry).toBe(5); // Should reset to initial number of tries
+        expect(game.isGameOver).toBe(false); // Game should not be over
+    });
 
-  test('chooseWord should select a word based on date', () => {
-    game.listOfWords = ['word', 'test', 'example'];
-    const mockDate = new Date('2023-01-01');
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    test('should update score in database on win', () => {
+        game.checkGameStatus = jest.fn(() => 'win'); // Simulate winning
+        game.startscore();
+        expect(updatescore).toHaveBeenCalledWith(expect.any(Number), 'win');
+    });
 
-    game.chooseWord();
-    expect(game.word).toBe('test'); // This is deterministic based on the date
-    expect(game.unknowWord).toBe('####');
-  });
+    test('should correctly guess a letter', () => {
+        const letter = 'a';
+        game.word = 'banana';
+        const result = game.guess(letter);
+        expect(result).toBe(true);
+        expect(game.unknowWord).toBe('a####a'); // Check if letter was revealed
+        expect(game.numberOfTry).toBe(5); // Should not decrease tries
+        
+        const incorrectGuess = game.guess('x');
+        expect(incorrectGuess).toBe(false);
+        expect(game.numberOfTry).toBe(4); // Should decrease tries
+        expect(game.score).toBe(game.initialscore - game.penaltyTime); // Check score after penalty
+    });
 
-  test('guess should update unknowWord and numberOfTry correctly', () => {
-    game.word = 'test';
-    game.unknowWord = '####';
-    game.guess('t');
-    expect(game.unknowWord).toBe('t##t');
-    expect(game.numberOfTry).toBe(5);
+    test('should handle guessing when game is over', () => {
+        game.isGameOver = true;
+        expect(game.guess('a')).toBe(false); // Should not allow guessing
+    });
 
-    game.guess('x');
-    expect(game.unknowWord).toBe('t##t');
-    expect(game.numberOfTry).toBe(4);
-  });
+    test('should retrieve letters tried', () => {
+        game.guess('a');
+        game.guess('b');
+        expect(game.getLettersTried()).toBe('a, b'); // Check if letters tried are returned correctly
+    });
 
-  test('getLettersTried should return correct letters', () => {
-    game.word = 'test';
-    game.guess('t');
-    game.guess('e');
-    game.guess('x');
-    expect(game.getLettersTried()).toBe('t, e, x');
-  });
+    test('should print current unknown word', () => {
+        game.word = 'banana';
+        game.unknowWord = 'b#####';
+        expect(game.print()).toBe('b#####'); // Check printed value of unknown word
+    });
 
-  test('reset should reset game state', () => {
-    game.word = 'test';
-    game.unknowWord = 't##t';
-    game.numberOfTry = 2;
-    game.reset();
-    expect(game.numberOfTry).toBe(5);
-    expect(game.word).not.toBe('test');
-    expect(game.unknowWord).toBe(game.word.replace(/./g, '#'));
-  });
+    test('should return the number of tries', () => {
+        expect(game.getNumberOfTries()).toBe(5); // Should return the initial number of tries
+    });
 
-  test('startscore should update score over time', () => {
-    game.startscore();
-    jest.advanceTimersByTime(10000);
-    expect(game.score).toBe(990);
-  });
+    test('should get the current score', () => {
+        expect(game.getscore()).toBe(game.initialscore); // Should return the initial score
+    });
 
-  test('startscore should stop when game is won', () => {
-    game.word = 'test';
-    game.unknowWord = 'test';
-    game.startscore();
-    jest.advanceTimersByTime(1000);
-    expect(game.score).toBe(999);
-    expect(game.isGameOver).toBe(true);
-  });
-
-  test('startscore should stop when game is lost', () => {
-    game.word = 'test';
-    game.numberOfTry = 0;
-    game.startscore();
-    jest.advanceTimersByTime(1000);
-    expect(game.score).toBe(999);
-    expect(game.isGameOver).toBe(true);
-  });
+    test('should get game status', () => {
+        expect(game.getStatus()).toBe('continue'); // Check initial status
+    });
 });

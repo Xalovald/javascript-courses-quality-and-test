@@ -8,13 +8,13 @@ class Game {
     constructor() {
         this.listOfWords = [];
         this.numberOfTry = 5;
-        this.initialscore = 1000; // score starts at 1000 seconds
+        this.initialscore = 1000; 
         this.score = this.initialscore;
         this.scoreIntervalId = null;
         this.startTime = null;
-        this.penaltyTime = 50; // Time to subtract for incorrect guesses
+        this.penaltyTime = 50;
         this.isGameOver = false;
-        this.status = 'continue'; // Initial game status
+        this.status = 'continue'; 
         this.lettersTried = [];
     }
 

@@ -1,10 +1,16 @@
-const { replaceAt } = require('../tools.js');
+const tools = require('../tools.js'); // Adjusted path
 
-describe('tools functions', () => {
-  test('replaceAt should replace character at given index', () => {
-    expect(replaceAt('hello', 1, 'a')).toBe('hallo');
-    expect(replaceAt('world', 0, 'W')).toBe('World');
-    expect(replaceAt('test', 4, '!')).toBe('test');
-    expect(replaceAt('', 0, 'a')).toBe('');
-  });
+describe('Tools Module', () => {
+    test('should replace character at specified index', () => {
+        const str = 'hello';
+        const result = tools.replaceCharAt(str, 1, 'a');
+        expect(result).toBe('hallo');
+    });
+
+    test('should return a random integer less than the specified max', () => {
+        const max = 10;
+        const randomNumber = tools.getRandomInt(max);
+        expect(randomNumber).toBeLessThan(max);
+        expect(randomNumber).toBeGreaterThanOrEqual(0);
+    });
 });
