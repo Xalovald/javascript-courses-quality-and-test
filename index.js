@@ -124,14 +124,13 @@ app.post('/save-username', (req, res) => {
     // Appeler la fonction pour sauvegarder les données du joueur
     savePlayerData(username, score, game_date)
         .then(() => {
-            res.redirect('/');
+            res.redirect('/?showModal=true&score=${encodeURIComponent(score)}');
         })
         .catch(err => {
             console.error("Error saving username and score:", err);
             res.status(500).send('Error saving username and score');
         });
 });
-
 
 // Route to get top players
 app.get('/top-players', (req, res) => {
@@ -145,6 +144,7 @@ app.get('/top-players', (req, res) => {
         }
     });
 });
+
 
 // Démarrer le serveur
 app.listen(PORT, () => {

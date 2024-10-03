@@ -178,28 +178,40 @@ footer {
         <% } else { %>
             <h1>❓ Le jeu du pendu ❓</h1>
             <p>Essayez de deviner le mot !</p>
-    
-            <form action="/" method="post">
-                <fieldset class="uk-fieldset">
-                    <legend class="uk-legend">
-                        Nombre d'essai restant : <%= numberOfTries %>
-                        </br><span id="score" data-score="<%= score %>"> Score : <%= score %></span>
-                    </legend>
-    
-                    <% if (lettersTried && lettersTried.length > 0) { %>
-                        <p>Lettres essayées : <%= lettersTried %></p>
-                    <% } %>
-                    
-                    <div class="uk-margin">
-                        <input class="uk-input" type="text" name="word" placeholder="Tapez une lettre" maxlength="1" id="lettersInput" oninput="validateInput()" pattern="[a-zA-Z]" title="entrer une lettre en a et z" required 
-                        autofocus>
-                    </div>
-    
-                    <div class="uk-margin">
-                        <button class="uk-input uk-button-secondary uk-form-width-medium" type="submit" value="form-success">Tester</button>
-                    </div>
-                </fieldset>
+
+            <!-- Form (Hidden if showModal=true) -->
+            <form id="gameForm" action="/" method="post">
+            <fieldset class="uk-fieldset">
+                <legend class="uk-legend">
+                Nombre d'essai restant : <%= numberOfTries %>
+                </br><span id="score" data-score="<%= score %>"> Score : <%= score %></span>
+                </legend>
+
+                <% if (lettersTried && lettersTried.length > 0) { %>
+                <p>Lettres essayées : <%= lettersTried %></p>
+                <% } %>
+
+                <div class="uk-margin">
+                <input class="uk-input" type="text" name="word" placeholder="Tapez une lettre" maxlength="1" id="lettersInput" oninput="validateInput()" pattern="[a-zA-Z]" title="entrer une lettre en a et z" required autofocus>
+                </div>
+
+                <div class="uk-margin">
+                <button class="uk-input uk-button-secondary uk-form-width-medium" type="submit" value="form-success">Tester</button>
+                </div>
+            </fieldset>
             </form>
+
+            <!-- Modal HTML -->
+            <div id="intermediateModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" id="closeModal">&times;</span>
+                    <h2>Success!</h2>
+                    <p>Your score is: <span id="scoreInModal"></span></p>
+                    <button id="twitterShareBtn" class="uk-button uk-button-secondary" onclick="shareOnTwitter()">Partager sur Twitter</button>
+
+                </div>
+            </div>
+  
         <% } %>
         <button id="showTopPlayers" class="uk-button uk-button-default">Afficher les meilleurs joueurs</button>
     </div>
@@ -241,6 +253,38 @@ footer {
         document.getElementById('scoreField').value = currentScore; // Mettre à jour le champ score
         document.getElementById('dateField').value = currentDate; // Mettre à jour le champ date
     });
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+// Check if 'showModal' is in the URL
+if (getQueryParam('showModal') === 'true') {
+    const score = getQueryParam('score');
+    document.getElementById('scoreInModal').textContent = score;
+
+    // Show the modal
+    document.getElementById('intermediateModal').style.display = 'block';
+    document.getElementById('gameForm').style.display = 'none'; // Hide the form
+} else {
+    // Show the form and hide the modal
+    document.getElementById('gameForm').style.display = 'block';
+    document.getElementById('intermediateModal').style.display = 'none';
+}
+
+    window.shareOnTwitter = function() {
+        const tweetText = "J'ai gagné au jeu du Pendu avec un score de " + currentScore + " ! Pouvez-vous faire mieux ?";
+        const tweetUrl = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetText);
+        window.open(tweetUrl, '_blank'); // Open Twitter share dialog
+    };
+
+// Close the modal when the close button is clicked
+document.getElementById('closeModal').addEventListener('click', function() {
+    document.getElementById('intermediateModal').style.display = 'none';
+    document.getElementById('gameForm').style.display = 'block'; // Show form again
+});
+
 </script>
 <script src="/js/status.js"></script>
 <script src="/js/topplayer.js"></script>
