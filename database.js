@@ -54,23 +54,19 @@ const insertInitialscore = () => {
     });
 };
 
-// Sauvegarder les données du joueur
-const savePlayerData = (playerName, score, gameDate) => {
+const savePlayerData = (name, score, gameDate) => {
     return new Promise((resolve, reject) => {
-        db.run(`
-            INSERT INTO players (name, score, game_date) 
-            VALUES (?, ?, ?)
-        `, [playerName, score, gameDate], function(err) {
+        const sql = `INSERT INTO players (name, score, game_date) VALUES (?, ?, ?)`;
+        db.run(sql, [name, score, gameDate], function(err) {
             if (err) {
-                console.error("Failed to insert player data", err);
-                reject(err); // Gestion d'erreur si l'insertion échoue
-            } else {
-                console.log(`Player data saved with ID: ${this.lastID}`);
-                resolve(this.lastID); // Résoudre avec l'ID du joueur inséré
+                return reject(err);
             }
+            resolve(this.lastID); // Return the id of the newly inserted player
         });
     });
 };
+
+
 
 // Sauvegarder le pseudo du joueur
 const saveUsername = (req, res) => {
@@ -107,21 +103,23 @@ const getPlayerData = (playerName, callback) => {
     });
 };
 
-// Mettre à jour le score seulement si le joueur gagne
 const updatescore = (score, gameStatus) => {
-    if (gameStatus === 'win') {  // Vérifier si le joueur a gagné
-        db.run(`
-            UPDATE game_state SET score = ? WHERE id = 1
-        `, [score], (err) => {
-            if (err) {
-                console.error("Failed to update score", err);
-            } else {
-                console.log(`Score updated to: ${score}`);
-            }
-        });
-    } else {
-        console.log("Game is not won, score not updated.");
-    }
+    return new Promise((resolve) => {  // Return a Promise
+        if (gameStatus === 'win') {  
+            db.run(`UPDATE game_state SET score = ? WHERE id = 1`, [score], (err) => {
+                if (err) {
+                    console.error("Failed to update score", err);
+                    resolve();  // Resolve the promise even on error
+                } else {
+                    console.log(`Score updated to: ${score}`); // This should be called
+                    resolve(); // Resolve the promise after the score is updated
+                }
+            });
+        } else {
+            console.log("Game is not won, score not updated.");
+            resolve(); // Resolve the promise even if the score isn't updated
+        }
+    });
 };
 
 // Sauvegarder le score dans la base de données

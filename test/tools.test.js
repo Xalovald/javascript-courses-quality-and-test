@@ -1,9 +1,9 @@
-const tools = require('../tools.js'); // Adjusted path
+const tools = require('../tools.js');
 
 describe('Tools Module', () => {
     test('should replace character at specified index', () => {
         const str = 'hello';
-        const result = tools.replaceCharAt(str, 1, 'a');
+        const result = tools.replaceAt(str, 1, 'a'); // Change replaceCharAt to replaceAt
         expect(result).toBe('hallo');
     });
 

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let score = 0;
     let gameWon = false;
     let scoreInterval = null;
-    let isFetching = true; // Verrouillage pour empêcher les actions avant synchronisation
+    let isFetching = true;
 
     // Fonction de mise à jour de l'affichage du score
     function updatescoreDisplay(score) {
@@ -18,41 +18,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 const serverscore = data.score;
                 const localscore = localStorage.getItem('gamescore');
 
-                // Priorité à la valeur serveur, réinitialiser localStorage si nécessaire
                 if (localscore === null || parseInt(localscore, 10) > serverscore) {
                     score = serverscore;
-                    localStorage.setItem('gamescore', score); // Sauvegarde locale avec la valeur serveur
+                    localStorage.setItem('gamescore', score);
                 } else {
-                    score = parseInt(localscore, 10); // Utiliser la valeur du localStorage
+                    score = parseInt(localscore, 10);
                 }
 
                 updatescoreDisplay(score);
-                isFetching = false; // Lever le verrou après synchronisation
+                isFetching = false;
 
-                // Lancer le score si ce n'est pas déjà fait
                 if (!scoreInterval) {
                     scoreInterval = setInterval(updatescore, 1000); // Décrémente chaque seconde
                 }
             })
             .catch(error => {
                 console.error('Error fetching score:', error);
-                isFetching = false; // Même en cas d'erreur, lever le verrou
+                isFetching = false; 
             });
     }
 
     // Fonction de mise à jour du score
     function updatescore() {
-        if (isFetching || gameWon) return; // Bloquer si en synchronisation ou si jeu gagné
+        if (isFetching || gameWon) return;
 
         if (score > 0) {
-            score--; // Décrémenter le score
+            score--;
             updatescoreDisplay(score);
-            localStorage.setItem('gamescore', score); // Sauvegarder dans localStorage
-            updateServerscore(score); // Sauvegarder immédiatement côté serveur
+            localStorage.setItem('gamescore', score);
+            updateServerscore(score);
         } else {
             scoreElement.textContent = " | Temps écoulé ! Vous ne pouvez plus jouer aujourd'hui.";
             disableInputs();
-            clearInterval(scoreInterval); // Arrêter le score quand il atteint 0
+            clearInterval(scoreInterval);
         }
     }
 
@@ -84,6 +82,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // Charger le score depuis le serveur et synchroniser
     fetchscore();
 
-    // Re-synchroniser toutes les 10 secondes, mais priorité à la valeur serveur au chargement
     setInterval(fetchscore, 10000);
 });

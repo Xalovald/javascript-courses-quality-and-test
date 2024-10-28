@@ -35,19 +35,17 @@ class Game {
     }
 
     checkGameStatus() {
-        // Check if the player has found all the letters in the word
         if (this.unknowWord === this.word) {
             this.isGameOver = true;
-            return 'win'; // The player wins
+            return 'win'; 
         }
 
-        // Check if the player has no tries left
         if (this.numberOfTry <= 0) {
             this.isGameOver = true;
-            return 'lose'; // The player loses
+            return 'lose';
         }
 
-        return 'continue'; // The game continues
+        return 'continue'; 
     }
 
     chooseWord() {
@@ -68,34 +66,41 @@ class Game {
         if (!this.word) {
             throw new Error("Le mot n'a pas été défini.");
         }
-
+    
         if (this.isGameOver) {
-            return false; // Ne pas autoriser de nouvelles tentatives si le jeu est terminé
+            return false; // If the game is over, no more guesses are allowed
         }
-
+    
+        // Convert the guessed letter to lowercase for comparison
+        const lowerCaseLetter = letter.toLowerCase();
+    
+        // Check if the letter has already been guessed
+        if (this.lettersTried.includes(lowerCaseLetter)) {
+            return false; // Letter already tried
+        }
+    
+        // If the letter hasn't been guessed yet, add it to the tried letters
+        this.lettersTried.push(lowerCaseLetter);
+    
+        const lowerCaseWord = this.word.toLowerCase(); // Convert the word to lowercase for comparison
         let found = false;
-        let position = this.word.indexOf(letter);
-
+        let position = lowerCaseWord.indexOf(lowerCaseLetter); // Use the lowercase word for searching
+    
         while (position !== -1) {
-            this.unknowWord = tools.replaceAt(this.unknowWord, position, letter);
+            this.unknowWord = tools.replaceAt(this.unknowWord, position, letter); // Keep the original letter case in unknowWord
             found = true;
-            position = this.word.indexOf(letter, position + 1);
+            position = lowerCaseWord.indexOf(lowerCaseLetter, position + 1); // Continue searching in the lowercase word
         }
-
+    
         if (!found) {
             this.numberOfTry--;
             this.initialscore = this.score -= this.penaltyTime;
         }
-
-        // Ajoutez la lettre dans le tableau des lettres essayées si elle n'y est pas déjà
-        if (!this.lettersTried.includes(letter)) {
-            this.lettersTried.push(letter);
-        }
-
-        return found;
+    
+        return found; // Return whether the letter was found in the word
     }
+       
 
-    // Méthode pour récupérer les lettres essayées
     getLettersTried() {
         return this.lettersTried.join(', ');
     }
@@ -111,30 +116,28 @@ class Game {
 
     reset() {
         this.numberOfTry = 5;
-        this.score = this.initialscore; // Reset score
-        this.isGameOver = false; // Reset game over status
+        this.score = this.initialscore; 
+        this.isGameOver = false;
         this.chooseWord();
         return this.numberOfTry;
     };
 
     startscore() {
-        this.startTime = Date.now(); // Initialize start time
+        this.startTime = Date.now();
         this.scoreIntervalId = setInterval(() => {
             const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
             this.score = this.initialscore - elapsedTime;
     
-            // Vérifiez l'état du jeu à chaque intervalle
             const status = this.checkGameStatus();
             
             if (status === 'win') {
-                // Mettre à jour le score dans la base de données uniquement si le joueur a gagné
                 updatescore(this.score, status);
-                clearInterval(this.scoreIntervalId); // Stop the score
-                this.isGameOver = true; // Mark the game as over
+                clearInterval(this.scoreIntervalId); 
+                this.isGameOver = true;
                 console.log("Game won! Score saved and timer stopped.");
             } else if (status === 'lose') {
-                clearInterval(this.scoreIntervalId); // Stop the score
-                this.isGameOver = true; // Mark the game as over
+                clearInterval(this.scoreIntervalId); 
+                this.isGameOver = true;
                 console.log("Game lost! Timer stopped.");
             } else if (this.score <= 0) {
                 this.score = 0;
