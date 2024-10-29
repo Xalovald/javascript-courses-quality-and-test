@@ -74,8 +74,6 @@ const savePlayerData = (name, score, gameDate) => {
     });
 };
 
-
-
 // Sauvegarder le pseudo du joueur
 const saveUsername = (req, res) => {
     const username = req.body.name; // Le pseudo
@@ -138,7 +136,7 @@ const savescoreToDB = (score) => {
 
 const getDbScore = async () => {
     let row = await new Promise((resolve, reject) => {
-        db.get(`SELECT score FROM gamestate WHERE id = 1`, (err,row) => {
+        db.get(`SELECT score FROM game_state WHERE id = 1`, (err,row) => {
             if(err || row == undefined) {
                 err ? reject(new Error (err)) : reject(new Error("No score found in DB"));
             }

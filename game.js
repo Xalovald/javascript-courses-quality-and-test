@@ -143,7 +143,7 @@ class Game {
                 this.isGameOver = true;
                 console.log("Score finished! You cannot play until the next day.");
             }
-        }, 1000);
+        }, 1000).unref();
     }
     
     getscore() {
