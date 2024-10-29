@@ -1,15 +1,13 @@
 const express = require('express');
 const path = require('path');
-const Game = require('./game.js'); // Importer la logique du jeu
-const { savePlayerData, getPlayerData, updatescore, getTopPlayers } = require('./database.js'); // Gérer la persistance
-const sqlite3 = require('sqlite3').verbose(); // Base de données SQLite
+const Game = require('./game.js');
+const { savePlayerData, getPlayerData, updatescore, getTopPlayers } = require('./database.js');
+const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3030;
 const app = express();
-const game = new Game(); // Initialiser le jeu
-
-// Connexion à la base de données SQLite
+const game = new Game();
 const db = new sqlite3.Database('./game.db', (err) => {
     if (err) {
         console.error('Failed to connect to the database', err);
@@ -69,8 +67,8 @@ app.get('/', (req, res) => {
 // Sauvegarder le score à intervalle régulier
 setInterval(() => {
     const currentscore = game.getscore();
-    savescoreToDB(currentscore); // Sauvegarde du score
-}, 1000); // Sauvegarde toutes les secondes
+    savescoreToDB(currentscore);
+}, 1000);
 
 // Route POST pour gérer les actions du joueur (deviner une lettre ou réinitialiser)
 app.post('/', (req, res) => {
@@ -79,7 +77,7 @@ app.post('/', (req, res) => {
 
         if (req.body.reset) {
             game.reset();
-            savescoreToDB(game.getscore()); // Sauvegarder le score réinitialisé
+            savescoreToDB(game.getscore());
         } else if (req.body.word) {
             game.guess(req.body.word);
             status = game.checkGameStatus();
@@ -117,9 +115,9 @@ app.get('/player/:name', (req, res) => {
 });
 
 app.post('/save-username', (req, res) => {
-    const username = req.body.name;  // Récupérer le nom d'utilisateur
-    const score = req.body.score;    // Récupérer le score
-    const game_date = new Date().toISOString().split('T')[0]; // Date actuelle
+    const username = req.body.name;
+    const score = req.body.score;
+    const game_date = new Date().toISOString().split('T')[0]; 
 
     // Appeler la fonction pour sauvegarder les données du joueur
     savePlayerData(username, score, game_date)
@@ -136,8 +134,8 @@ app.post('/save-username', (req, res) => {
 app.get('/top-players', (req, res) => {
     getTopPlayers((players) => {
         if (players) {
-            console.log('Top players:', players); // Log des joueurs récupérés
-            res.json(players); // Renvoie les joueurs sous forme de JSON
+            console.log('Top players:', players); 
+            res.json(players);
         } else {
             console.error('Erreur lors de la récupération des joueurs');
             res.status(500).send('Erreur lors de la récupération des meilleurs joueurs.');

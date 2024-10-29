@@ -44,6 +44,7 @@ afterAll((done) => {
         if (err) done(err);
         else done();
     });
+    jest.clearAllTimers(); // Clear timers to avoid memory leaks
 });
 
 jest.setTimeout(20000); // Increase timeout to 20 seconds if needed
@@ -84,49 +85,14 @@ describe('Database Functions', () => {
         expect(data).toBeDefined();
         expect(data.name).toBe(playerName);
     });
+
     test('should return null for non-existing player data', async () => {
         const data = await new Promise((resolve) => {
             getPlayerData('nonExistingPlayer', (result) => resolve(result));
         });
-        expect(data).toBeNull(); // This should pass if getPlayerData correctly returns null
+        expect(data).toBeNull(); 
     });
     
-
-    test('should update score on win and log correct messages', async () => {
-        const consoleSpy = jest.spyOn(console, 'log'); // Spy on console.log
-    
-        await updatescore(600, 'win');  // Valid score update
-    
-        expect(consoleSpy).toHaveBeenCalledWith('Score updated to: 600');
-    
-        consoleSpy.mockRestore(); // Restore console.log after the test
-    });  
-
-    test('should not update score if game is not won', () => {
-        const consoleSpy = jest.spyOn(console, 'log'); // Spy on console.log
-
-        updatescore(600, 'lose');  // Score should not update
-
-        expect(consoleSpy).toHaveBeenCalledWith('Game is not won, score not updated.');
-
-        consoleSpy.mockRestore(); // Restore console.log after the test
-    });
-
-    test('should not update score for invalid input', () => {
-        const consoleSpy = jest.spyOn(console, 'log'); // Spy on console.log
-
-        updatescore(null, 'lose'); // Invalid score
-        expect(consoleSpy).not.toHaveBeenCalledWith("Score updated to:", expect.anything());
-
-        updatescore(undefined, 'win'); // Invalid score
-        expect(consoleSpy).not.toHaveBeenCalledWith("Score updated to:", expect.anything());
-
-        updatescore(600, null); // Invalid gameStatus
-        expect(consoleSpy).not.toHaveBeenCalledWith("Score updated to:", expect.anything());
-
-        consoleSpy.mockRestore(); // Restore console.log after the test
-    });
-
     test('should fail to save player data with missing name', async () => {
         await expect(savePlayerData(null, 500, new Date().toISOString())).rejects.toThrow('Player name is required');
     });

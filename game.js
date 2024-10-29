@@ -68,28 +68,26 @@ class Game {
         }
     
         if (this.isGameOver) {
-            return false; // If the game is over, no more guesses are allowed
+            return false; 
         }
     
-        // Convert the guessed letter to lowercase for comparison
         const lowerCaseLetter = letter.toLowerCase();
     
-        // Check if the letter has already been guessed
+        
         if (this.lettersTried.includes(lowerCaseLetter)) {
-            return false; // Letter already tried
+            return false;
         }
-    
-        // If the letter hasn't been guessed yet, add it to the tried letters
+
         this.lettersTried.push(lowerCaseLetter);
     
-        const lowerCaseWord = this.word.toLowerCase(); // Convert the word to lowercase for comparison
+        const lowerCaseWord = this.word.toLowerCase(); 
         let found = false;
-        let position = lowerCaseWord.indexOf(lowerCaseLetter); // Use the lowercase word for searching
+        let position = lowerCaseWord.indexOf(lowerCaseLetter); 
     
         while (position !== -1) {
-            this.unknowWord = tools.replaceAt(this.unknowWord, position, letter); // Keep the original letter case in unknowWord
+            this.unknowWord = tools.replaceAt(this.unknowWord, position, letter); 
             found = true;
-            position = lowerCaseWord.indexOf(lowerCaseLetter, position + 1); // Continue searching in the lowercase word
+            position = lowerCaseWord.indexOf(lowerCaseLetter, position + 1);
         }
     
         if (!found) {
@@ -97,7 +95,7 @@ class Game {
             this.initialscore = this.score -= this.penaltyTime;
         }
     
-        return found; // Return whether the letter was found in the word
+        return found;
     }
        
 

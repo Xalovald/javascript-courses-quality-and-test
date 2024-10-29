@@ -37,7 +37,7 @@ const createTables = () => {
                 console.error("Failed to create game_state table", err);
             } else {
                 console.log("Game state table created or already exists");
-                insertInitialscore(); // Insérer le score initial si nécessaire
+                insertInitialscore();
             }
         });
     });
@@ -57,11 +57,19 @@ const insertInitialscore = () => {
 const savePlayerData = (name, score, gameDate) => {
     return new Promise((resolve, reject) => {
         const sql = `INSERT INTO players (name, score, game_date) VALUES (?, ?, ?)`;
+        if(!name || !score || !gameDate )
+        {
+            let result = "";
+            if(!name) result="Player name is required";
+            if(!score) result="Score is required";
+            if(!gameDate) result="Game date is required";
+            return reject(new Error(result));
+        }
         db.run(sql, [name, score, gameDate], function(err) {
             if (err) {
                 return reject(err);
             }
-            resolve(this.lastID); // Return the id of the newly inserted player
+            resolve(this.lastID);
         });
     });
 };
@@ -94,7 +102,7 @@ const getPlayerData = (playerName, callback) => {
     db.get(`
         SELECT * FROM players WHERE name = ? ORDER BY game_date DESC LIMIT 1
     `, [playerName], (err, row) => {
-        if (err) {
+        if (err || row == undefined) {
             console.error("Error retrieving player data", err);
             callback(null);
         } else {
@@ -109,24 +117,38 @@ const updatescore = (score, gameStatus) => {
             db.run(`UPDATE game_state SET score = ? WHERE id = 1`, [score], (err) => {
                 if (err) {
                     console.error("Failed to update score", err);
-                    resolve();  // Resolve the promise even on error
+                    resolve();
                 } else {
-                    console.log(`Score updated to: ${score}`); // This should be called
-                    resolve(); // Resolve the promise after the score is updated
+                    console.log(`Score updated to: ${score}`); 
+                    resolve();
                 }
             });
         } else {
             console.log("Game is not won, score not updated.");
-            resolve(); // Resolve the promise even if the score isn't updated
+            resolve();
         }
     });
 };
 
 // Sauvegarder le score dans la base de données
 const savescoreToDB = (score) => {
-    console.log(`Saving score to DB: ${score}`); // Log du score pour vérification
-    updatescore(score, 'win'); // Mise à jour dans la base de données avec statut 'win'
+    console.log(`Saving score to DB: ${score}`);
+    updatescore(score, 'win');
 };
+
+const getDbScore = async () => {
+    let row = await new Promise((resolve, reject) => {
+        db.get(`SELECT score FROM gamestate WHERE id = 1`, (err,row) => {
+            if(err || row == undefined) {
+                err ? reject(new Error (err)) : reject(new Error("No score found in DB"));
+            }
+            else {
+                resolve(row);
+            }
+        });
+    });
+    return row.score;
+}
 
 // Récupérer les meilleurs joueurs
 const getTopPlayers = (callback) => {
@@ -139,7 +161,7 @@ const getTopPlayers = (callback) => {
             console.error("Error retrieving top players", err);
             callback([]);
         } else {
-            callback(rows); // Renvoie les joueurs récupérés
+            callback(rows);
         }
     });
 };
@@ -147,7 +169,8 @@ const getTopPlayers = (callback) => {
 module.exports = {
     savePlayerData,
     getPlayerData,
-    updatescore,  // Mise à jour de la fonction updateScore avec gameStatus
+    updatescore,
+    getDbScore,
     saveUsername,
     getTopPlayers,
     savescoreToDB

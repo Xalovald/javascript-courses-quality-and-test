@@ -1,7 +1,6 @@
 const request = require('supertest');
 const express = require('express');
 const path = require('path');
-const { savePlayerData, getPlayerData, updatescore, getTopPlayers } = require('../database.js'); // Adjusted path to point to database.js
 
 describe('Index Routes', () => {
     let app;
@@ -48,6 +47,10 @@ describe('Index Routes', () => {
             res.json([{ name: 'Player1', score: 100 }, { name: 'Player2', score: 90 }]);
         });
     });
+
+    afterAll((done) => {
+        done();
+    })
 
     test('GET / should load the game page', async () => {
         const response = await request(app).get('/');

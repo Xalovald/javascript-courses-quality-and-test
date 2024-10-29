@@ -13,4 +13,10 @@ describe('Tools Module', () => {
         expect(randomNumber).toBeLessThan(max);
         expect(randomNumber).toBeGreaterThanOrEqual(0);
     });
+
+    test('should not modify if index is out of bounds', () => {
+        const str = 'hello';
+        const result = tools.replaceAt(str, 5, 'a');
+        expect(result).toBe('hello');
+    });
 });

@@ -1,6 +1,5 @@
 const Game = require('../game.js'); 
-const { updatescore } = require('../database.js'); 
-jest.mock('../database.js');
+const { updatescore, getDbScore } = require('../database.js'); 
 
 describe('Game Class', () => {
     let game;
@@ -10,6 +9,11 @@ describe('Game Class', () => {
         game.listOfWords = ['apple', 'banana', 'cherry'];
         game.chooseWord();
     });
+
+    afterAll((done) => {
+        jest.clearAllTimers();
+        done();
+    })
 
     test('should load words from CSV', async () => {
         game.loadWords = jest.fn(() => {
@@ -22,7 +26,7 @@ describe('Game Class', () => {
 
     test('should choose a word based on the date', () => {
         expect(game.word).toBeDefined(); 
-        expect(game.unknowWord).toBe('#####');
+        expect(game.unknowWord).toMatch(/#{5,}/g);
     });
 
     test('should check game status correctly', () => {
@@ -43,17 +47,14 @@ describe('Game Class', () => {
         expect(game.word).toBeDefined();
         expect(game.numberOfTry).toBe(5);
         expect(game.isGameOver).toBe(false);
-        expect(game.unknowWord).toBe('#####');
+        expect(game.unknowWord).toMatch(/#{5,}/g);
     });
 
     test('should update score in database on win', async () => {
-        game.checkGameStatus = jest.fn(() => 'win');
-        game.startscore();
-
+        game.startscore;
         game.score = 100;
-
-        await game.updateScore();
-        expect(updatescore).toHaveBeenCalledWith(expect.any(Number), 'win');
+        await updatescore(game.score, 'win');
+        expect(await getDbScore()).toBe(game.score);
     });
 
     test('should correctly guess a letter', () => {
@@ -61,7 +62,7 @@ describe('Game Class', () => {
         game.word = 'banana';
         const result = game.guess(letter);
         expect(result).toBe(true);
-        expect(game.unknowWord).toBe('a####a'); 
+        expect(game.unknowWord).toBe('#a#a#a'); 
         expect(game.numberOfTry).toBe(5);
         
         const incorrectGuess = game.guess('x');
@@ -101,7 +102,7 @@ describe('Game Class', () => {
     });
 
     test('should handle incorrect guesses correctly', () => {
-        const letter = 'b';
+        const letter = 'c';
         game.word = 'banana';
         game.guess(letter); 
         expect(game.numberOfTry).toBe(4); 
@@ -121,38 +122,36 @@ describe('Game Class', () => {
     test('should update score based on the number of tries left', async () => {
         game.numberOfTry = 3; 
         game.score = game.initialscore; 
-        await game.updateScore();
+        await updatescore(game.score, 'continue');
         expect(game.score).toBe(game.initialscore);
     });
 
     test('should not allow guessing the same letter multiple times', () => {
         game.word = 'banana';
         
-        // First guess 'b', it should reveal only the 'b'
         expect(game.guess('b')).toBe(true); 
-        expect(game.unknowWord).toBe('b####'); // Only 'b' is revealed, 'a' remains hidden
-    
-        // Second guess of 'b', should return false since it's already guessed
+        expect(game.unknowWord).toBe('b#####'); 
+
         expect(game.guess('b')).toBe(false);
-        expect(game.numberOfTry).toBe(5); // The number of tries should remain the same
+        expect(game.numberOfTry).toBe(5);
     });
     
     
 
     test('should reveal all occurrences of a letter when guessed correctly', () => {
-        game.word = 'banana'; // Set the word to guess
-        expect(game.guess('B')).toBe(true); // Guess 'B'
-        expect(game.unknowWord).toBe('B####'); // Check if 'B' is revealed
+        game.word = 'banana';
+        expect(game.guess('B')).toBe(true);
+        expect(game.unknowWord).toBe('B#####'); 
     
-        expect(game.guess('a')).toBe(true); // Guess 'a'
-        expect(game.unknowWord).toBe('Ba##a'); // Both 'a's should be revealed
+        expect(game.guess('a')).toBe(true);
+        expect(game.unknowWord).toBe('Ba#a#a');
     });
     
 
     test('should handle case sensitivity in letter guessing', () => {
-        game.word = 'banana'; // Set the word to guess
-        expect(game.guess('B')).toBe(true); // Guessing 'B' should return true
-        expect(game.unknowWord).toBe('B####'); // 'B' is revealed, but 'a' remains hidden
+        game.word = 'banana';
+        expect(game.guess('B')).toBe(true); 
+        expect(game.unknowWord).toBe('B#####'); 
     });
     
     test('should reset the score when starting a new game', async () => {
@@ -171,15 +170,14 @@ describe('Game Class', () => {
         game.score = 10;
         game.numberOfTry = 0;
 
-        // Mock the updateScore method to prevent changing score
         game.updateScore = jest.fn(async () => {
-            // Do nothing; this mock prevents the actual logic from executing
+
             return Promise.resolve();
         });
 
         await game.updateScore();
         expect(game.score).toBe(10); 
-        expect(game.updateScore).toHaveBeenCalled(); // Check if the method was called
+        expect(game.updateScore).toHaveBeenCalled();
     });
 
     test('should not allow duplicate letters in tried letters', () => {
@@ -196,6 +194,6 @@ describe('Game Class', () => {
         expect(game.score).toBe(game.initialscore);
         expect(game.numberOfTry).toBe(5);
         expect(game.isGameOver).toBe(false);
-        expect(game.unknowWord).toBe('#####');
+        expect(game.unknowWord).toMatch(/#{5,}/g);
     });
 });
