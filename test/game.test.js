@@ -6,7 +6,7 @@ describe('Game Class', () => {
 
     beforeEach(() => {
         game = new Game();
-        game.listOfWords = ['apple', 'banana', 'cherry'];
+        game.listOfWords = ['banana'];
         game.chooseWord();
     });
 
@@ -34,11 +34,11 @@ describe('Game Class', () => {
         expect(game.checkGameStatus()).toBe('lose');
         
         game.numberOfTry = 5; 
-        game.word = 'apple'; 
-        game.unknowWord = 'apple'; 
+        game.word = 'Banana'; 
+        game.unknowWord = 'Banana'; 
         expect(game.checkGameStatus()).toBe('win');
         
-        game.unknowWord = '#####'; 
+        game.unknowWord = '######'; 
         expect(game.checkGameStatus()).toBe('continue');
     });
 
