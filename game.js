@@ -28,7 +28,7 @@ class Game {
                 .on('end', () => {
                     console.log('CSV file successfully processed');
                     this.chooseWord();
-                    resolve();
+                    resolve(this.listOfWords);
                 })
                 .on('error', reject);
         });
@@ -56,10 +56,14 @@ class Game {
             const index = dateHash % this.listOfWords.length;
 
             this.word = this.listOfWords[index];
-            this.unknowWord = this.word.replace(/./g, '#');
+            this.hashWord();
         } else {
             throw new Error("No words available to choose from.");
         }
+    }
+
+    hashWord(){
+        this.unknowWord = this.word.replace(/./g, '#');
     }
 
     guess(letter) {

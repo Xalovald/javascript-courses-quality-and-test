@@ -101,7 +101,19 @@ const getPlayerData = (playerName, callback) => {
         SELECT * FROM players WHERE name = ? ORDER BY game_date DESC LIMIT 1
     `, [playerName], (err, row) => {
         if (err || row == undefined) {
-            console.error("Error retrieving player data", err);
+            err ? console.error("Error retrieving player data", err) : null;
+            callback(null);
+        } else {
+            callback(row);
+        }
+    });
+};
+
+const getPlayerDataById = (id, callback) => {
+    db.get(`SELECT * FROM players WHERE id = ? ORDER BY game_date DESC LIMIT 1`
+    , [id], (err, row) => {
+        if (err || row == undefined) {
+            err ? console.error("Error retrieving player data", err) : null;
             callback(null);
         } else {
             callback(row);
@@ -171,5 +183,6 @@ module.exports = {
     getDbScore,
     saveUsername,
     getTopPlayers,
-    savescoreToDB
+    savescoreToDB,
+    getPlayerDataById
 };

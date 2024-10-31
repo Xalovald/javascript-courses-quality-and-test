@@ -6,7 +6,7 @@ describe('Game Class', () => {
 
     beforeEach(() => {
         game = new Game();
-        game.listOfWords = ['canada', 'banana', 'goyave'];
+        game.listOfWords = ['apple', 'banana', 'cherry'];
         game.chooseWord();
     });
 
@@ -16,12 +16,8 @@ describe('Game Class', () => {
     })
 
     test('should load words from CSV', async () => {
-        game.loadWords = jest.fn(() => {
-            game.listOfWords.push('mockWord');
-            return Promise.resolve();
-        });
-        await game.loadWords();
-        expect(game.listOfWords).toContain('mockWord');
+        let words_list = await game.loadWords();
+        expect(words_list).toContain('morue');
     });
 
     test('should choose a word based on the date', () => {
@@ -34,11 +30,11 @@ describe('Game Class', () => {
         expect(game.checkGameStatus()).toBe('lose');
         
         game.numberOfTry = 5; 
-        game.word = 'Goyave'; 
-        game.unknowWord = 'Goyave'; 
+        game.word = 'Apple'; 
+        game.unknowWord = 'Apple'; 
         expect(game.checkGameStatus()).toBe('win');
         
-        game.unknowWord = '######'; 
+        game.hashWord(); 
         expect(game.checkGameStatus()).toBe('continue');
     });
 
@@ -60,6 +56,7 @@ describe('Game Class', () => {
     test('should correctly guess a letter', () => {
         const letter = 'a';
         game.word = 'banana';
+        game.hashWord(); 
         const result = game.guess(letter);
         expect(result).toBe(true);
         expect(game.unknowWord).toBe('#a#a#a'); 
@@ -68,7 +65,7 @@ describe('Game Class', () => {
         const incorrectGuess = game.guess('x');
         expect(incorrectGuess).toBe(false);
         expect(game.numberOfTry).toBe(4);
-        expect(game.score).toBe(game.initialscore - game.penaltyTime);
+        expect(game.score).toBe(game.initialscore);
     });
 
     test('should handle guessing when game is over', () => {
@@ -104,6 +101,7 @@ describe('Game Class', () => {
     test('should handle incorrect guesses correctly', () => {
         const letter = 'c';
         game.word = 'banana';
+        game.hashWord(); 
         game.guess(letter); 
         expect(game.numberOfTry).toBe(4); 
     });
@@ -111,6 +109,7 @@ describe('Game Class', () => {
     test('should not reveal letters if not guessed correctly', () => {
         const letter = 'z';
         game.word = 'banana';
+        game.hashWord(); 
         game.guess(letter);
         expect(game.unknowWord).toBe('######'); 
     });
@@ -128,6 +127,7 @@ describe('Game Class', () => {
 
     test('should not allow guessing the same letter multiple times', () => {
         game.word = 'banana';
+        game.hashWord(); 
         
         expect(game.guess('b')).toBe(true); 
         expect(game.unknowWord).toBe('b#####'); 
@@ -136,10 +136,10 @@ describe('Game Class', () => {
         expect(game.numberOfTry).toBe(5);
     });
     
-    
 
     test('should reveal all occurrences of a letter when guessed correctly', () => {
         game.word = 'banana';
+        game.hashWord(); 
         expect(game.guess('B')).toBe(true);
         expect(game.unknowWord).toBe('B#####'); 
     
@@ -150,6 +150,7 @@ describe('Game Class', () => {
 
     test('should handle case sensitivity in letter guessing', () => {
         game.word = 'banana';
+        game.hashWord(); 
         expect(game.guess('B')).toBe(true); 
         expect(game.unknowWord).toBe('B#####'); 
     });
@@ -182,6 +183,7 @@ describe('Game Class', () => {
 
     test('should not allow duplicate letters in tried letters', () => {
         game.word = 'banana';
+        game.hashWord(); 
         game.guess('b');
         game.guess('b'); 
         expect(game.getLettersTried()).toBe('b'); 

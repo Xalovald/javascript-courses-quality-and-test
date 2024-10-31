@@ -41,7 +41,7 @@ const savescoreToDB = (score) => {
 
 // Charger les mots et initialiser le jeu avec un score persistant
 app.get('/', (req, res) => {
-    game.loadWords().then(() => {
+    game.loadWords().then((_res) => {
         loadscoreFromDB((savedscore) => {
             if (savedscore !== null) {
                 game.setscore(savedscore); // Charger le score sauvegardé

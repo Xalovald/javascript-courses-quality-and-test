@@ -4,6 +4,7 @@ const {
     getPlayerData,
     updatescore,
     getTopPlayers,
+    getPlayerDataById,
 } = require('../database.js');
 
 let db;
@@ -59,13 +60,13 @@ describe('Database Functions', () => {
         expect(id).toBeDefined();
 
         const row = await new Promise((resolve, reject) => {
-            db.get('SELECT * FROM players WHERE id = ?', id, (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
+            getPlayerDataById(id, (result) => {
+                if(result) resolve(result);
+                else reject(new Error('Player data not found'));
+            })
         });
 
-        expect(row).toBeDefined();
+        expect(row).toHaveProperty("id");
         expect(row.name).toBe(playerName);
         expect(row.score).toBe(score);
         expect(row.game_date).toBe(gameDate);
