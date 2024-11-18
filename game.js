@@ -128,7 +128,7 @@ class Game {
         this.startTime = Date.now();
         this.scoreIntervalId = setInterval(() => {
             const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
-            this.score = this.initialscore - elapsedTime;
+            this.score = Math.max(0, this.initialscore - elapsedTime);
     
             const status = this.checkGameStatus();
             

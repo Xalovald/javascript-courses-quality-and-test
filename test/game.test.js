@@ -1,6 +1,7 @@
 const Game = require('../game.js'); 
 const { updatescore, getDbScore } = require('../database.js'); 
 
+
 describe('Game Class', () => {
     let game;
 
@@ -198,4 +199,71 @@ describe('Game Class', () => {
         expect(game.isGameOver).toBe(false);
         expect(game.unknowWord).toMatch(/#{5,}/g);
     });
+
+    // Test for startscore function
+    test('should start the game and update the score', () => {
+        jest.useFakeTimers();
+        game.startscore();
+        jest.advanceTimersByTime(5000); // Avance le temps de 5 secondes
+
+        expect(game.score).toBe(game.initialscore - 5);
+    });
+
+    test('should win the game, update score, stop the timer, and mark game as over', () => {
+        jest.useFakeTimers();
+        game.checkGameStatus = jest.fn().mockReturnValue('win');
+        const updatescoreSpy = jest.spyOn(require('../database.js'), 'updatescore');
+    
+        // Initialiser le score et d'autres propriétés nécessaires
+        game.initialscore = 10;
+        game.score = game.initialscore;
+        game.isGameOver = false;
+    
+        game.startscore();
+    
+        // Avancer les timers de 1 seconde à la fois pour simuler le comportement de l'intervalle
+        for (let i = 0; i < 5; i++) {
+            jest.advanceTimersByTime(1000);
+        }
+    
+        // Logs pour diagnostiquer
+        console.log('Score after 5 seconds:', game.score);
+        console.log('Game over status:', game.isGameOver);
+        console.log('Score interval ID:', game.scoreIntervalId);
+        console.log('updatescoreSpy calls:', updatescoreSpy.mock.calls);
+    
+        // Vérifier que le score est correctement mis à jour
+        expect(game.score).toBe(game.initialscore - 5);
+    
+        // Vérifier que le jeu est marqué comme terminé
+        expect(game.isGameOver).toBe(true);
+    
+        // Vérifier que updatescore a été appelé avec les bons arguments
+        expect(updatescoreSpy).toHaveBeenCalledWith(game.initialscore - 5, 'win');
+    
+        // Vérifier que clearInterval a été appelé avec le bon ID d'intervalle
+        expect(clearInterval).toHaveBeenCalledWith(game.scoreIntervalId);
+    });
+    
+    
+    test('should lose the game and stop the timer', () => {
+        jest.useFakeTimers();
+        game.checkGameStatus = jest.fn().mockReturnValue('lose');
+        game.startscore();
+        jest.advanceTimersByTime(5000); // Avance le temps de 5 secondes
+
+        expect(game.isGameOver).toBe(true);
+    });
+
+    test('should stop the game when the score reaches 0', () => {
+        jest.useFakeTimers();
+        game.initialscore = 5;
+        game.startscore();
+        jest.advanceTimersByTime(6000); // Avance le temps de 6 secondes
+
+        expect(game.score).toBe(0);
+        expect(game.isGameOver).toBe(true);
+    });
+
+    //TODO lines : 61, 71
 });

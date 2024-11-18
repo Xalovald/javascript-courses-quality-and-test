@@ -97,4 +97,8 @@ describe('Database Functions', () => {
     test('should fail to save player data with missing name', async () => {
         await expect(savePlayerData(null, 500, new Date().toISOString())).rejects.toThrow('Player name is required');
     });
+
+    //TODO lines : 5, 24, 37, 50, 70, 79-94, 116-117, 129-130, 145-146, 153, 165-174 
+
+    
 });
