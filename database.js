@@ -1,188 +1,178 @@
 const sqlite3 = require('sqlite3').verbose();
-
-const db = new sqlite3.Database('./players.db', (err) => {
-    if (err) {
-        console.error('Could not connect to the database', err);
-    } else {
-        console.log('Connected to the SQLite database');
-        createTables(); // Créer les tables nécessaires
+class CustomDatabase {
+    constructor(logging = true) {
+        this.dbError = null;
+        this.db = null;
+        this.shouldLog = logging;
     }
-});
 
-// Créer les tables si elles n'existent pas
-const createTables = () => {
-    db.serialize(() => {
-        db.run(`
-            CREATE TABLE IF NOT EXISTS players (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                score INTEGER,
-                game_date TEXT
-            )
-        `, (err) => {
+    initialize = (path) => {
+        this.db = new sqlite3.Database(path, (err) => {
             if (err) {
-                console.error("Failed to create players table", err);
+                this.shouldLog ? this.dbError = new Error('Could not connect to the database') : null;
             } else {
-                console.log("Players table created or already exists");
+                this.shouldLog ? console.log('Connected to the SQLite database') : null;
+                this.shouldLog ? console.log('Creating tables...') : null;
+                this.createTables(); // Créer les tables nécessaires
             }
         });
+        return this;
+    };
 
-        db.run(`
-            CREATE TABLE IF NOT EXISTS game_state (
-                id INTEGER PRIMARY KEY,
-                score INTEGER
-            )
-        `, (err) => {
+    createTables = (custom1 = null, custom2 = null) => {
+        this.db.serialize(() => {
+            this.db.run(custom1 ? custom1 : `
+                CREATE TABLE IF NOT EXISTS players (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    score INTEGER,
+                    game_date TEXT
+                )
+            `, (err) => {
+                if (err) {
+                    this.dbError = new Error("Failed to create players table");
+                } else {
+                    this.shouldLog ? console.log("Players table created or already exists") : null;
+                }
+            });
+
+            this.db.run(custom2 ? custom2 : `
+                CREATE TABLE IF NOT EXISTS game_state (
+                    id INTEGER PRIMARY KEY,
+                    score INTEGER
+                )
+            `, (err) => {
+                if (err) {
+                    this.shouldLog ? console.error("Failed to create game_state table", err) : null;
+                    this.dbError = new Error("Failed to create game_state table");
+                } else {
+                    this.shouldLog ? console.log("Game state table created or already exists") : null;
+                    this.insertInitialscore();
+                }
+            });
+        });
+        return this;
+    };
+
+    // Insérer une valeur initiale pour le score
+    insertInitialscore = (initialScore = 1000) => {
+        this.db.run(`INSERT OR IGNORE INTO game_state (id, score) VALUES (1, ${initialScore})`, (err) => {
             if (err) {
-                console.error("Failed to create game_state table", err);
+                this.shouldLog ? console.error("Failed to insert initial score", err) : null;
+                this.dbError = new Error("Failed to insert initial score");
             } else {
-                console.log("Game state table created or already exists");
-                insertInitialscore();
+                this.shouldLog ? console.log("Initial score inserted into game_state.") : null;
             }
         });
-    });
-};
+        return this;
+    };
 
-// Insérer une valeur initiale pour le score
-const insertInitialscore = () => {
-    db.run(`INSERT OR IGNORE INTO game_state (id, score) VALUES (1, 1000)`, (err) => {
-        if (err) {
-            console.error("Failed to insert initial score", err);
-        } else {
-            console.log("Initial score inserted into game_state.");
-        }
-    });
-};
-
-const savePlayerData = (name, score, gameDate) => {
-    return new Promise((resolve, reject) => {
-        const sql = `INSERT INTO players (name, score, game_date) VALUES (?, ?, ?)`;
-        if(!name || !score || !gameDate )
-        {
-            let result = "";
-            if(!name) result="Player name is required";
-            if(!score) result="Score is required";
-            if(!gameDate) result="Game date is required";
-            return reject(new Error(result));
-        }
-        db.run(sql, [name, score, gameDate], function(err) {
-            if (err) {
-                return reject(err);
+    savePlayerData = (name, score, gameDate) => {
+        console.log(name, score, gameDate);
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO players (name, score, game_date) VALUES (?, ?, ?)`;
+            if (!name || !score || !gameDate) {
+                let result = "";
+                if (!name) result = "Player name is required";
+                if (!score) result = "Score is required";
+                if (!gameDate) result = "Game date is required";
+                reject(new Error(result));
             }
-            resolve(this.lastID);
+            else {
+                this.db.run(sql, [name, score, gameDate], function (err) {
+                    if (err) {
+                       reject(new Error(err));
+                    }
+                    else {
+                        resolve(this.lastID);
+                    }
+                });
+            }
         });
-    });
-};
+    };
 
-// Sauvegarder le pseudo du joueur
-const saveUsername = (req, res) => {
-    const username = req.body.name; // Le pseudo
-    const score = req.body.score; // Le score
-    const game_date = new Date().toISOString(); // Date actuelle
-
-    console.log(`Saving player: ${username}, Score: ${score}, Date: ${game_date}`); // Ajoutez un log pour déboguer
-
-    // SQL pour insérer les données
-    const query = 'INSERT INTO players (name, score, game_date) VALUES (?, ?, ?)';
-    
-    db.run(query, [username, score, game_date], function(err) {
-        if (err) {
-            console.error("Database error:", err.message);
-            return res.status(500).send('Database error');
-        }
-        console.log(`Player ${username} saved successfully!`); // Log pour confirmer l'enregistrement
-        res.redirect('/'); 
-    });
-};
-
-// Récupérer les données du joueur
-const getPlayerData = (playerName, callback) => {
-    db.get(`
+    // Récupérer les données du joueur
+    getPlayerData = (playerName, callback) => {
+        this.db.get(`
         SELECT * FROM players WHERE name = ? ORDER BY game_date DESC LIMIT 1
     `, [playerName], (err, row) => {
-        if (err || row == undefined) {
-            err ? console.error("Error retrieving player data", err) : null;
-            callback(null);
-        } else {
-            callback(row);
-        }
-    });
-};
+            if (err || row == undefined) {
+                err ? console.error("Error retrieving player data", err) : null;
+                callback(null);
+            } else {
+                callback(row);
+            }
+        });
+    };
 
-const getPlayerDataById = (id, callback) => {
-    db.get(`SELECT * FROM players WHERE id = ? ORDER BY game_date DESC LIMIT 1`
-    , [id], (err, row) => {
-        if (err || row == undefined) {
-            err ? console.error("Error retrieving player data", err) : null;
-            callback(null);
-        } else {
-            callback(row);
-        }
-    });
-};
-
-const updatescore = (score, gameStatus) => {
-    return new Promise((resolve) => {  // Return a Promise
-        if (gameStatus === 'win') {  
-            db.run(`UPDATE game_state SET score = ? WHERE id = 1`, [score], (err) => {
-                if (err) {
-                    console.error("Failed to update score", err);
-                    resolve();
+    getPlayerDataById = (id, callback) => {
+        this.db.get(`SELECT * FROM players WHERE id = ? ORDER BY game_date DESC LIMIT 1`
+            , [id], (err, row) => {
+                if (err || row == undefined) {
+                    err ? this.shouldLog ? console.error("Error retrieving player data", err) : null : null;
+                    callback(null);
                 } else {
-                    console.log(`Score updated to: ${score}`); 
-                    resolve();
+                    callback(row);
+                }
+            });
+    };
+
+    updatescore = (score, gameStatus) => {
+        if (gameStatus === 'win') {
+            this.db.run(`UPDATE game_state SET score = ? WHERE id = 1`, [score], (err) => {
+                if (err) {
+                    this.shouldLog ? console.error("Failed to update score", err) : null;
+                    this.dbError = new Error("Failed to update score");
+                } else {
+                    this.shouldLog ? console.log(`Score updated to: ${score}`) : null;
                 }
             });
         } else {
-            console.log("Game is not won, score not updated.");
-            resolve();
+            this.shouldLog ? console.log("Game is not won, score not updated.") : null;
         }
-    });
-};
+    };
 
-// Sauvegarder le score dans la base de données
-const savescoreToDB = (score) => {
-    console.log(`Saving score to DB: ${score}`);
-    updatescore(score, 'win');
-};
+    // Sauvegarder le score dans la base de données
+    savescoreToDB = (score) => {
+        this.shouldLog ? console.log(`Saving score to DB: ${score}`) : null;
+        this.updatescore(score, 'win');
+    };
 
-const getDbScore = async () => {
-    let row = await new Promise((resolve, reject) => {
-        db.get(`SELECT score FROM game_state WHERE id = 1`, (err,row) => {
-            if(err || row == undefined) {
-                err ? reject(new Error (err)) : reject(new Error("No score found in DB"));
-            }
-            else {
-                resolve(row);
-            }
+    getDbScore = async (id = 1) => {
+        let row = await new Promise((resolve, reject) => {
+            this.db.get(`SELECT score FROM game_state WHERE id = ${id}`, (err, row) => {
+                if (err || row == undefined) {
+                    err ? reject(new Error(err)) : reject(new Error("No score found in DB"));
+                }
+                else {
+                    resolve(row);
+                }
+            });
         });
-    });
-    return row.score;
-}
+        return row.score;
+    }
 
-// Récupérer les meilleurs joueurs
-const getTopPlayers = (callback) => {
-    db.all(`
+    // Récupérer les meilleurs joueurs
+    getTopPlayers = (callback, customSql = null) => {
+        this.db.all(customSql ? customSql : `
         SELECT name, score, game_date FROM players 
         ORDER BY score DESC 
         LIMIT 1000
     `, [], (err, rows) => {
-        if (err) {
-            console.error("Error retrieving top players", err);
-            callback([]);
-        } else {
-            callback(rows);
-        }
-    });
-};
+            if (err) {
+                this.shouldLog ? console.error("Error retrieving top players", err) : null;
+                callback(new Error("Error retrieving top players"));
+            } else {
+                callback(rows);
+            }
+        });
+    };
+
+    throwError = () => {
+        throw this.dbError;
+    };
+}
 
 module.exports = {
-    savePlayerData,
-    getPlayerData,
-    updatescore,
-    getDbScore,
-    saveUsername,
-    getTopPlayers,
-    savescoreToDB,
-    getPlayerDataById
+    CustomDatabase,
 };

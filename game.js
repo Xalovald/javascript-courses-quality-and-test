@@ -1,21 +1,28 @@
-const { savePlayerData, getPlayerData, updatescore } = require('./database.js');
+const { CustomDatabase } = require('./database.js');
 const tools = require('./tools.js');
 const csv = require('csv-parser');
 const fs = require('fs');
 
 class Game {
 
-    constructor() {
+    constructor(logging = true) {
         this.listOfWords = [];
         this.numberOfTry = 5;
-        this.initialscore = 1000; 
+        this.initialscore = 1000;
         this.score = this.initialscore;
         this.scoreIntervalId = null;
         this.startTime = null;
         this.penaltyTime = 50;
         this.isGameOver = false;
-        this.status = 'continue'; 
+        this.status = 'continue';
         this.lettersTried = [];
+        this.shouldLog = logging;
+        this.db = null;
+        
+    }
+
+    loadDb(logging) {
+        this.db = new CustomDatabase(logging).initialize('./players.db');
     }
 
     loadWords() {
@@ -37,7 +44,7 @@ class Game {
     checkGameStatus() {
         if (this.unknowWord === this.word) {
             this.isGameOver = true;
-            return 'win'; 
+            return 'win';
         }
 
         if (this.numberOfTry <= 0) {
@@ -45,7 +52,7 @@ class Game {
             return 'lose';
         }
 
-        return 'continue'; 
+        return 'continue';
     }
 
     chooseWord() {
@@ -62,7 +69,7 @@ class Game {
         }
     }
 
-    hashWord(){
+    hashWord() {
         this.unknowWord = this.word.replace(/./g, '#');
     }
 
@@ -70,38 +77,38 @@ class Game {
         if (!this.word) {
             throw new Error("Le mot n'a pas été défini.");
         }
-    
+
         if (this.isGameOver) {
-            return false; 
+            return false;
         }
-    
+
         const lowerCaseLetter = letter.toLowerCase();
-    
-        
+
+
         if (this.lettersTried.includes(lowerCaseLetter)) {
             return false;
         }
 
         this.lettersTried.push(lowerCaseLetter);
-    
-        const lowerCaseWord = this.word.toLowerCase(); 
+
+        const lowerCaseWord = this.word.toLowerCase();
         let found = false;
-        let position = lowerCaseWord.indexOf(lowerCaseLetter); 
-    
+        let position = lowerCaseWord.indexOf(lowerCaseLetter);
+
         while (position !== -1) {
-            this.unknowWord = tools.replaceAt(this.unknowWord, position, letter); 
+            this.unknowWord = tools.replaceAt(this.unknowWord, position, letter);
             found = true;
             position = lowerCaseWord.indexOf(lowerCaseLetter, position + 1);
         }
-    
+
         if (!found) {
             this.numberOfTry--;
             this.initialscore = this.score -= this.penaltyTime;
         }
-    
+
         return found;
     }
-       
+
 
     getLettersTried() {
         return this.lettersTried.join(', ');
@@ -118,7 +125,7 @@ class Game {
 
     reset() {
         this.numberOfTry = 5;
-        this.score = this.initialscore; 
+        this.score = this.initialscore;
         this.isGameOver = false;
         this.chooseWord();
         return this.numberOfTry;
@@ -129,16 +136,16 @@ class Game {
         this.scoreIntervalId = setInterval(() => {
             const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
             this.score = Math.max(0, this.initialscore - elapsedTime);
-    
+
             const status = this.checkGameStatus();
-            
+
             if (status === 'win') {
-                updatescore(this.score, status);
-                clearInterval(this.scoreIntervalId); 
+                this.db.updatescore(this.score, status);
+                clearInterval(this.scoreIntervalId);
                 this.isGameOver = true;
                 console.log("Game won! Score saved and timer stopped.");
             } else if (status === 'lose') {
-                clearInterval(this.scoreIntervalId); 
+                clearInterval(this.scoreIntervalId);
                 this.isGameOver = true;
                 console.log("Game lost! Timer stopped.");
             } else if (this.score <= 0) {
@@ -149,13 +156,15 @@ class Game {
             }
         }, 1000).unref();
     }
-    
+
     getscore() {
         return this.score;
     }
-    
+
     getStatus() {
         return this.status;
     }
 }
-module.exports = Game;
+module.exports = {
+    Game
+};

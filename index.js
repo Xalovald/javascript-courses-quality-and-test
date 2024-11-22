@@ -1,20 +1,13 @@
 const express = require('express');
 const path = require('path');
-const Game = require('./game.js');
-const { savePlayerData, getPlayerData, updatescore, getTopPlayers } = require('./database.js');
-const sqlite3 = require('sqlite3').verbose();
+const { Game } = require('./game.js');
+const { CustomDatabase } = require('./database.js');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3030;
 const app = express();
 const game = new Game();
-const db = new sqlite3.Database('./game.db', (err) => {
-    if (err) {
-        console.error('Failed to connect to the database', err);
-    } else {
-        console.log('Connected to SQLite database');
-    }
-});
+game.loadDb(true)
 
 // Middleware
 app.use(express.json());
@@ -24,7 +17,7 @@ app.set('view engine', 'ejs');
 
 // Fonction pour charger le score de la base de données
 const loadscoreFromDB = (callback) => {
-    db.get('SELECT score FROM game_state WHERE id = 1', (err, row) => {
+    game.db.db.get('SELECT score FROM game_state WHERE id = 1', (err, row) => {
         if (err) {
             console.error('Error retrieving score:', err.message);
             callback(null);
@@ -36,18 +29,14 @@ const loadscoreFromDB = (callback) => {
 
 // Fonction pour sauvegarder le score dans la base de données
 const savescoreToDB = (score) => {
-    updatescore(score); // Mise à jour dans la base de données
+    game.db.updatescore(score); // Mise à jour dans la base de données
 };
 
 // Charger les mots et initialiser le jeu avec un score persistant
 app.get('/', (req, res) => {
     game.loadWords().then((_res) => {
         loadscoreFromDB((savedscore) => {
-            if (savedscore !== null) {
-                game.setscore(savedscore); // Charger le score sauvegardé
-            } else {
-                game.startscore(); // Démarrer un nouveau score si aucun n'est sauvegardé
-            }
+            game.startscore(); // Démarrer un nouveau score si aucun n'est sauvegardé
 
             res.render('pages/index', {
                 game: game.print(),
@@ -101,7 +90,7 @@ app.post('/', (req, res) => {
 app.get('/player/:name', (req, res) => {
     const playerName = req.params.name;
 
-    getPlayerData(playerName, (data) => {
+    game.db.getPlayerData(playerName, (data) => {
         if (data) {
             res.render('pages/player', {
                 name: data.name,
@@ -117,12 +106,13 @@ app.get('/player/:name', (req, res) => {
 app.post('/save-username', (req, res) => {
     const username = req.body.name;
     const score = req.body.score;
+    console.log(score)
     const game_date = new Date().toISOString().split('T')[0]; 
 
     // Appeler la fonction pour sauvegarder les données du joueur
-    savePlayerData(username, score, game_date)
+    game.db.savePlayerData(username, score, game_date)
         .then(() => {
-            res.redirect('/?showModal=true&score=${encodeURIComponent(score)}');
+            res.redirect('/?showModal=true&score=${encodeURIComponent(score)}&status=win');
         })
         .catch(err => {
             console.error("Error saving username and score:", err);
@@ -132,7 +122,7 @@ app.post('/save-username', (req, res) => {
 
 // Route to get top players
 app.get('/top-players', (req, res) => {
-    getTopPlayers((players) => {
+    game.db.getTopPlayers((players) => {
         if (players) {
             console.log('Top players:', players); 
             res.json(players);

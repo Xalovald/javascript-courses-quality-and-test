@@ -250,7 +250,6 @@ footer {
     document.addEventListener('DOMContentLoaded', () => {
         currentScore = <%= score %>; // Insert the current score (ensure this works server-side)
         const currentDate = new Date().toISOString().split('T')[0]; // Date in YYYY-MM-DD format
-
         document.getElementById('scoreField').value = currentScore; // Update score field
         document.getElementById('dateField').value = currentDate; // Update date field
     });

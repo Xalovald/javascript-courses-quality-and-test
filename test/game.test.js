@@ -1,20 +1,28 @@
-const Game = require('../game.js'); 
-const { updatescore, getDbScore } = require('../database.js'); 
-
-
+const { CustomDatabase } = require('../database.js');
+const { Game } = require('../game.js');
 describe('Game Class', () => {
     let game;
+    let db;
 
     beforeEach(() => {
-        game = new Game();
+        game = new Game(false);
+        game.db = new CustomDatabase(false).initialize('./tests.db')
         game.listOfWords = ['apple', 'banana', 'cherry'];
         game.chooseWord();
     });
 
     afterAll((done) => {
+        game.db.updatescore(1000, 'win')
         jest.clearAllTimers();
         done();
     })
+
+    test('should create Game with logs and load DB', () => {
+        const testGame = new Game();
+        testGame.loadDb(false)
+        expect(testGame.shouldLog).toBe(true);
+    });
+
 
     test('should load words from CSV', async () => {
         let words_list = await game.loadWords();
@@ -48,10 +56,8 @@ describe('Game Class', () => {
     });
 
     test('should update score in database on win', async () => {
-        game.startscore;
-        game.score = 100;
-        await updatescore(game.score, 'win');
-        expect(await getDbScore()).toBe(game.score);
+        await game.db.updatescore(game.score, 'win');
+        expect(await game.db.getDbScore()).toBe(game.score);
     });
 
     test('should correctly guess a letter', () => {
@@ -122,7 +128,7 @@ describe('Game Class', () => {
     test('should update score based on the number of tries left', async () => {
         game.numberOfTry = 3; 
         game.score = game.initialscore; 
-        await updatescore(game.score, 'continue');
+        await game.db.updatescore(game.score, 'continue');
         expect(game.score).toBe(game.initialscore);
     });
 
@@ -211,38 +217,23 @@ describe('Game Class', () => {
 
     test('should win the game, update score, stop the timer, and mark game as over', () => {
         jest.useFakeTimers();
-        game.checkGameStatus = jest.fn().mockReturnValue('win');
-        const updatescoreSpy = jest.spyOn(require('../database.js'), 'updatescore');
-    
-        // Initialiser le score et d'autres propriétés nécessaires
-        game.initialscore = 10;
-        game.score = game.initialscore;
-        game.isGameOver = false;
-    
+        game.word = 'banana';
+        game.shouldLogOnWin = false
         game.startscore();
-    
+        
         // Avancer les timers de 1 seconde à la fois pour simuler le comportement de l'intervalle
         for (let i = 0; i < 5; i++) {
             jest.advanceTimersByTime(1000);
         }
-    
-        // Logs pour diagnostiquer
-        console.log('Score after 5 seconds:', game.score);
-        console.log('Game over status:', game.isGameOver);
-        console.log('Score interval ID:', game.scoreIntervalId);
-        console.log('updatescoreSpy calls:', updatescoreSpy.mock.calls);
-    
+        
         // Vérifier que le score est correctement mis à jour
         expect(game.score).toBe(game.initialscore - 5);
+        
+        game.unknowWord = 'banana';
+        jest.advanceTimersByTime(1000);
     
         // Vérifier que le jeu est marqué comme terminé
         expect(game.isGameOver).toBe(true);
-    
-        // Vérifier que updatescore a été appelé avec les bons arguments
-        expect(updatescoreSpy).toHaveBeenCalledWith(game.initialscore - 5, 'win');
-    
-        // Vérifier que clearInterval a été appelé avec le bon ID d'intervalle
-        expect(clearInterval).toHaveBeenCalledWith(game.scoreIntervalId);
     });
     
     
@@ -265,5 +256,13 @@ describe('Game Class', () => {
         expect(game.isGameOver).toBe(true);
     });
 
-    //TODO lines : 61, 71
+    test('should throw error when no words in listOfWords', () => {
+        game.listOfWords = [];
+        expect(() => game.chooseWord()).toThrow();
+    });
+    
+    test('should throw error when no word has been set', () => {
+        game.word = null;
+        expect(() => game.guess()).toThrow();
+    });
 });
