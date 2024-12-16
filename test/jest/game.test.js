@@ -1,5 +1,5 @@
-const { CustomDatabase } = require('../database.js');
-const { Game } = require('../game.js');
+const { CustomDatabase } = require('../../database.js');
+const { Game } = require('../../game.js');
 describe('Game Class', () => {
     let game;
     let db;

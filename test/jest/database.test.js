@@ -1,6 +1,6 @@
 const {
     CustomDatabase,
-} = require('../database.js');
+} = require('../../database.js');
 
 describe('Database Functions', () => {
 
