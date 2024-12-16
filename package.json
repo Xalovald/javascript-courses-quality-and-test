@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest --coverage",
-    "test:unit": "jest --coverage",
+    "test": "jest --testPathPattern=jest --coverage && npx playwright test",
+    "test:unit": "jest --testPathPattern=jest --coverage",
     "test:e2e": "npx playwright test"
   },
   "author": "",
