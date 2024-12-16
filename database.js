@@ -128,7 +128,7 @@ class CustomDatabase {
                 }
             });
         } else {
-            this.shouldLog ? console.log("Game is not won, score not updated.") : null;
+            //this.shouldLog ? console.log("Game is not won, score not updated.") : null;
         }
     };
 
