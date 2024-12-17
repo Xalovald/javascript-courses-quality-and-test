@@ -3,7 +3,8 @@ const {
 } = require('../../database.js');
 
 describe('Database Functions', () => {
-let customDb;
+
+    let customDb;
 
     beforeAll((done) => {
         customDb = new CustomDatabase(false).initialize('./tests.db');
@@ -26,8 +27,11 @@ let customDb;
         });
     });
 
-    beforeEach((done) => {
+    beforeEach(() => {
         customDb = new CustomDatabase(false).initialize('./tests.db');
+    });
+
+    afterEach((done) => {
         customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS players (
@@ -37,30 +41,23 @@ let customDb;
                     game_date DATE NOT NULL
                 )
             `);
+        });
+        customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS game_state (
                     id INTEGER PRIMARY KEY,
                     score INTEGER
                 )
             `);
-            done();
         });
-    });
-
-    afterEach((done) => {
-        customDb.db.serialize(() => {
-            customDb.db.run(`DROP TABLE IF EXISTS players`, (err) => {
-                if (err) return done(err);
-                customDb.db.run(`DROP TABLE IF EXISTS game_state`, (err) => {
-                    if (err) return done(err);
-                    done(); // Resolve done after cleaning up
-                });
-            });
+        customDb.db.run('DELETE FROM players', (err) => {
+            if (err) done(err);
+            else done(); // Resolve done after cleaning up
         });
     });
 
     afterAll((done) => {
-        customDb.updatescore(1000, 'win');
+        customDb.updatescore(1000, 'win')
         customDb.db.close((err) => {
             if (err) done(err);
             else done();
