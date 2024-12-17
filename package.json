@@ -11,7 +11,8 @@
   },
   "jest": {
     "collectCoverage": true,
-    "coverageReporters": ["lcov"]
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["lcov", "json-summary"]
   },
   "author": "",
   "license": "ISC",

@@ -21,9 +21,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: List installed dependencies
-      run: npm list --depth=0
-
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
@@ -36,14 +33,27 @@ jobs:
     - name: Wait for server to be ready
       run: npx wait-on http://localhost:3030
 
-    - name: Run Jest and Playwright tests
-      run: npm test
+    - name: Run Playwright tests
+      run: npx playwright test
+
+    - name: Run Jest tests and generate coverage report
+      run: npm test --coverage --reporters=lcov
+      
+    - name: Convert lcov.info to coverage-summary.json
+      run: |
+        npx lcov-to-json coverage/lcov.info > coverage/coverage-summary.json
 
     - name: Generate coverage badges
       uses: jpb06/coverage-badges-action@v1.0.13
       with:
-        coverage-file: coverage/lcov.info
-        badge-path: coverage/badges
+        branches: main,end-to-end
+        coverage-summary-path: coverage/coverage-summary.json
+        badges-icon: coverage
+        commit-message: "chore: update coverage badges"
+        commit-user: "github-actions[bot]"
+        commit-user-email: "github-actions[bot]@users.noreply.github.com"
+        output-folder: coverage/badges
+
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
