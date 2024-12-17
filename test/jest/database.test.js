@@ -61,8 +61,6 @@ describe('Database Functions', () => {
             if (err) done(err);
             else done();
         });
-        jest.clearAllTimers(); // Clear timers to avoid memory leaks
-    });
     
     jest.setTimeout(20000); // Increase timeout to 20 seconds if needed
 
