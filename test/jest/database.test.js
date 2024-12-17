@@ -26,9 +26,12 @@ describe('Database Functions', () => {
             done();
         });
     });
-
-    beforeEach((done) => {
+    
+    beforeEach(() => {
         customDb = new CustomDatabase(false).initialize('./tests.db');
+    });
+
+    afterEach((done) => {
         customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS players (
@@ -38,17 +41,15 @@ describe('Database Functions', () => {
                     game_date DATE NOT NULL
                 )
             `);
+        });
+        customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS game_state (
                     id INTEGER PRIMARY KEY,
                     score INTEGER
                 )
             `);
-            done();
         });
-    });
-
-    afterEach((done) => {
         customDb.db.run('DELETE FROM players', (err) => {
             if (err) done(err);
             else done(); // Resolve done after cleaning up
@@ -56,12 +57,13 @@ describe('Database Functions', () => {
     });
 
     afterAll((done) => {
-        customDb.updatescore(1000, 'win');
+        customDb.updatescore(1000, 'win')
         customDb.db.close((err) => {
             if (err) done(err);
             else done();
         });
-    
+        jest.clearAllTimers(); // Clear timers to avoid memory leaks
+    });
     jest.setTimeout(20000); // Increase timeout to 20 seconds if needed
 
     test('should initialize database', () => {
