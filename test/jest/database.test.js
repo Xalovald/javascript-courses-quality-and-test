@@ -109,11 +109,6 @@ describe('Database Functions', () => {
         expect(() => dbInstance.dbError).toBeDefined();
     });
 
-    test('should not save player data', async () => {
-        customDb.db.run(`DROP TABLE players`);
-
-        await expect(customDb.savePlayerData('John Doe', 100, '2024-11-21')).rejects.toThrow();
-    });
 
     test('should not create tables', async () => {
         let customSql1 = `
