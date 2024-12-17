@@ -29,6 +29,15 @@ describe('Database Functions', () => {
 
     afterEach((done) => {
         customDb.db.serialize(() => {
+            customDb.db.run(`DROP TABLE IF EXISTS players`, (err) => {
+                if (err) return done(err);
+                customDb.db.run(`DROP TABLE IF EXISTS game_state`, (err) => {
+                    if (err) return done(err);
+                    done(); // Resolve done after cleaning up
+                });
+            });
+        });
+        customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS players (
                     id INTEGER PRIMARY KEY,
