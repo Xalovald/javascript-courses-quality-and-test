@@ -10,8 +10,9 @@
     "test:e2e": "npx playwright test"
   },
   "jest": {
-    "collectCoverage": true,
-    "coverageReporters": ["lcov"]
+  "collectCoverage": true,
+  "coverageDirectory": "coverage",
+  "coverageReporters": ["lcov"]
   },
   "author": "",
   "license": "ISC",
