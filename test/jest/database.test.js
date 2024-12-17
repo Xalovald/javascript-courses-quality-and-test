@@ -29,15 +29,6 @@ describe('Database Functions', () => {
 
     afterEach((done) => {
         customDb.db.serialize(() => {
-            customDb.db.run(`DROP TABLE IF EXISTS players`, (err) => {
-                if (err) return done(err);
-                customDb.db.run(`DROP TABLE IF EXISTS game_state`, (err) => {
-                    if (err) return done(err);
-                    done(); // Resolve done after cleaning up
-                });
-            });
-        });
-        customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS players (
                     id INTEGER PRIMARY KEY,
@@ -62,6 +53,28 @@ describe('Database Functions', () => {
     });
 
     afterAll((done) => {
+        customDb.db.serialize(() => {
+            customDb.db.run(`
+                CREATE TABLE IF NOT EXISTS players (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    score INTEGER NOT NULL,
+                    game_date DATE NOT NULL
+                )
+            `);
+        });
+        customDb.db.serialize(() => {
+            customDb.db.run(`
+                CREATE TABLE IF NOT EXISTS game_state (
+                    id INTEGER PRIMARY KEY,
+                    score INTEGER
+                )
+            `);
+        });
+        customDb.db.run('DELETE FROM players', (err) => {
+            if (err) done(err);
+            else done(); // Resolve done after cleaning up
+        });
         customDb.updatescore(1000, 'win')
         customDb.db.close((err) => {
             if (err) done(err);
