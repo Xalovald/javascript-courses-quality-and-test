@@ -6,7 +6,7 @@ describe('Database Functions', () => {
 
     let customDb;
 
-    beforeAll((done) => {
+    beforeEach((done) => {
         customDb = new CustomDatabase(false).initialize('./tests.db');
         customDb.db.serialize(() => {
             customDb.db.run(`
@@ -26,10 +26,6 @@ describe('Database Functions', () => {
             done();
         });
     });
-    
-    beforeEach(() => {
-        customDb = new CustomDatabase(false).initialize('./tests.db');
-    });
 
     afterEach((done) => {
         customDb.db.serialize(() => {
@@ -44,7 +40,7 @@ describe('Database Functions', () => {
     });
 
     afterAll((done) => {
-        customDb.updatescore(1000, 'win')
+        customDb.updatescore(1000, 'win');
         customDb.db.close((err) => {
             if (err) done(err);
             else done();
