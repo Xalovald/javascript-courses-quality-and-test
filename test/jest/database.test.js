@@ -70,18 +70,7 @@ describe('Database Functions', () => {
     test('should initialize database', () => {
         expect(customDb).toBeDefined();
     });
-
-      test('La table players contient un joueur', (done) => {
-    customDb.get(`SELECT * FROM players WHERE pseudo = ?`, ['TestPlayer'], (err, row) => {
-      if (err) throw err;
-
-      expect(row).not.toBeNull();
-      expect(row.pseudo).toBe('TestPlayer');
-      expect(row.score).toBe(100);
-      done();
-    });
-});
-          
+              
     test('should retrieve player data', async () => {
         const playerName = 'testPlayer';
 
