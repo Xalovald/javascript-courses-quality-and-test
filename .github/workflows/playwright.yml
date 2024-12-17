@@ -31,3 +31,6 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+    - name: Coverage badges generation action
+      uses: jpb06/coverage-badges-action@v1.0.13
+            
