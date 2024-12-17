@@ -21,6 +21,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: List installed dependencies
+      run: npm list --depth=0
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
@@ -33,11 +36,8 @@ jobs:
     - name: Wait for server to be ready
       run: npx wait-on http://localhost:3030
 
-    - name: Run Playwright tests
-      run: npx playwright test
-
-    - name: Run Jest tests and generate coverage report
-      run: jest --testPathPattern=jest --coverage
+    - name: Run Jest and Playwright tests
+      run: npm test
 
     - name: Generate coverage badges
       uses: jpb06/coverage-badges-action@v1.0.13
