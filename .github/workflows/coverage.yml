@@ -37,7 +37,7 @@ jobs:
       run: npx playwright test
 
     - name: Run Jest tests and generate coverage report
-      run: npm test
+      run: npm test -- --coverage --reporters=lcov
 
     - name: Generate coverage badges
       uses: jpb06/coverage-badges-action@v1.0.13
