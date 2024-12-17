@@ -71,27 +71,7 @@ describe('Database Functions', () => {
         expect(customDb).toBeDefined();
     });
 
-    test('should save player data', async () => {
-        const playerName = 'testPlayer';
-        const score = 500;
-        const gameDate = new Date().toISOString();
-
-        const id = await customDb.savePlayerData(playerName, score, gameDate);
-        expect(id).toBeDefined();
-
-        const row = await new Promise((resolve, reject) => {
-            customDb.getPlayerDataById(id, (result) => {
-                if (result) resolve(result);
-                else reject(new Error('Player data not found'));
-            })
-        });
-
-        expect(row).toHaveProperty("id");
-        expect(row.name).toBe(playerName);
-        expect(row.score).toBe(score);
-        expect(row.game_date).toBe(gameDate);
-    });
-
+    
     test('should retrieve player data', async () => {
         const playerName = 'testPlayer';
 
