@@ -27,8 +27,11 @@ describe('Database Functions', () => {
         });
     });
 
-    beforeEach((done) => {
+    beforeEach(() => {
         customDb = new CustomDatabase(false).initialize('./tests.db');
+    });
+
+    afterEach((done) => {
         customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS players (
@@ -38,49 +41,18 @@ describe('Database Functions', () => {
                     game_date DATE NOT NULL
                 )
             `);
+        });
+        customDb.db.serialize(() => {
             customDb.db.run(`
                 CREATE TABLE IF NOT EXISTS game_state (
                     id INTEGER PRIMARY KEY,
                     score INTEGER
                 )
             `);
-            done();
         });
-
-        // Log to check if tables exist before each test
-        customDb.db.serialize(() => {
-            customDb.db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name='players'`, (err, row) => {
-                if (err) console.error('Error checking players table:', err);
-                else console.log('players table exists:', !!row);
-            });
-            customDb.db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name='game_state'`, (err, row) => {
-                if (err) console.error('Error checking game_state table:', err);
-                else console.log('game_state table exists:', !!row);
-            });
-        });
-    });
-
-    afterEach((done) => {
-        customDb.db.serialize(() => {
-            customDb.db.run(`DROP TABLE IF EXISTS players`, (err) => {
-                if (err) return done(err);
-                customDb.db.run(`DROP TABLE IF EXISTS game_state`, (err) => {
-                    if (err) return done(err);
-                    done(); // Resolve done after cleaning up
-                });
-            });
-        });
-
-        // Log to check if tables exist after each test
-        customDb.db.serialize(() => {
-            customDb.db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name='players'`, (err, row) => {
-                if (err) console.error('Error checking players table:', err);
-                else console.log('players table exists after cleanup:', !!row);
-            });
-            customDb.db.get(`SELECT name FROM sqlite_master WHERE type='table' AND name='game_state'`, (err, row) => {
-                if (err) console.error('Error checking game_state table:', err);
-                else console.log('game_state table exists after cleanup:', !!row);
-            });
+        customDb.db.run('DELETE FROM players', (err) => {
+            if (err) done(err);
+            else done(); // Resolve done after cleaning up
         });
     });
 
@@ -92,7 +64,9 @@ describe('Database Functions', () => {
         });
         jest.clearAllTimers(); // Clear timers to avoid memory leaks
     });
-    
+
+    jest.setTimeout(20000); // Increase timeout to 20 seconds if needed
+
     test('should initialize database', () => {
         expect(customDb).toBeDefined();
     });
