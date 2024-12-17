@@ -72,7 +72,7 @@ describe('Database Functions', () => {
     });
 
       test('La table players contient un joueur', (done) => {
-    db.get(`SELECT * FROM players WHERE pseudo = ?`, ['TestPlayer'], (err, row) => {
+    customDb.get(`SELECT * FROM players WHERE pseudo = ?`, ['TestPlayer'], (err, row) => {
       if (err) throw err;
 
       expect(row).not.toBeNull();
