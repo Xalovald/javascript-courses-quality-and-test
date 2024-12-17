@@ -38,17 +38,22 @@ jobs:
 
     - name: Run Jest tests and generate coverage report
       run: npm test --coverage --reporters=lcov
+      
+    - name: Convert lcov.info to coverage-summary.json
+      run: |
+        npx lcov-to-json coverage/lcov.info > coverage/coverage-summary.json
 
     - name: Generate coverage badges
       uses: jpb06/coverage-badges-action@v1.0.13
       with:
         branches: main,end-to-end
-        coverage-summary-path: coverage/lcov.info
+        coverage-summary-path: coverage/coverage-summary.json
         badges-icon: coverage
         commit-message: "chore: update coverage badges"
         commit-user: "github-actions[bot]"
         commit-user-email: "github-actions[bot]@users.noreply.github.com"
         output-folder: coverage/badges
+
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
