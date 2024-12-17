@@ -80,6 +80,7 @@ describe('Database Functions', () => {
       expect(row.score).toBe(100);
       done();
     });
+});
           
     test('should retrieve player data', async () => {
         const playerName = 'testPlayer';
