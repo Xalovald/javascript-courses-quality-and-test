@@ -3,8 +3,28 @@ const {
 } = require('../../database.js');
 
 describe('Database Functions', () => {
+let customDb;
 
-    let customDb;
+    beforeAll((done) => {
+        customDb = new CustomDatabase(false).initialize('./tests.db');
+        customDb.db.serialize(() => {
+            customDb.db.run(`
+                CREATE TABLE IF NOT EXISTS players (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    score INTEGER NOT NULL,
+                    game_date DATE NOT NULL
+                )
+            `);
+            customDb.db.run(`
+                CREATE TABLE IF NOT EXISTS game_state (
+                    id INTEGER PRIMARY KEY,
+                    score INTEGER
+                )
+            `);
+            done();
+        });
+    });
 
     beforeEach((done) => {
         customDb = new CustomDatabase(false).initialize('./tests.db');
@@ -47,6 +67,7 @@ describe('Database Functions', () => {
         });
         jest.clearAllTimers(); // Clear timers to avoid memory leaks
     });
+
     jest.setTimeout(20000); // Increase timeout to 20 seconds if needed
 
     test('should initialize database', () => {
