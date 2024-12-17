@@ -1,0 +1,54 @@
+name: Coverage Badges
+
+on:
+  push:
+    branches: [ main, end-to-end ]
+  pull_request:
+    branches: [ main, end-to-end ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Install wait-on
+      run: npm install -D wait-on
+
+    - name: Start local server
+      run: npm start &
+
+    - name: Wait for server to be ready
+      run: npx wait-on http://localhost:3030
+
+    - name: Run Playwright tests
+      run: npx playwright test
+
+    - name: Generate coverage report
+      run: npx nyc report --reporter=lcov
+
+    - name: Generate coverage badges
+      uses: jpb06/coverage-badges-action@v1.0.13
+      with:
+        coverage-file: coverage/lcov.info
+        badge-path: coverage/badges
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 30
