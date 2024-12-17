@@ -1,3 +1,6 @@
+[![Playwright Tests](https://github.com/Xalovald/javascript-courses-quality-and-test/actions/workflows/playwright.yml/badge.svg)](https://github.com/Xalovald/javascript-courses-quality-and-test/actions/workflows/playwright.yml)
+---
+
 # Hangman Game
 
 This is a small project to build a classic Hangman game in JavaScript.
