@@ -1,39 +1,61 @@
-# Hangman Game
+# Jeu du Pendu
 
-This is a small project to build a classic Hangman game in JavaScript.
-The primary goal of this project is to practice and learn how to write tests using various tools and frameworks, including Jest.
+Ceci est un petit projet pour créer un jeu classique **Jeu du Pendu** en JavaScript. L'objectif principal de ce projet est de pratiquer et d'apprendre à écrire des tests en utilisant divers outils et frameworks, y compris **Jest** et **Playwright**.
 
-**Test-Driven Development:** The project is structured to encourage writing tests for each feature of the game.
+## Développement axé sur les tests
 
-## Getting Started
+Le projet est structuré pour encourager l'écriture de tests pour chaque fonctionnalité du jeu.
 
-### Running the Game
+---
 
-To start the game, copy and paste the .env.example file to .env and set the PORT variable to 3030.
+## Démarrage
 
-Then use the following command:
+### Exécuter le jeu
+
+Pour lancer le jeu, copiez et renommez le fichier `.env.example` en `.env`, puis configurez la variable **PORT** à `3030`.
+
+Ensuite, exécutez la commande suivante :
 
 ```bash
 npm start
 ```
 
-This will start the server, and you can play the game by visiting `http://localhost:3030` in your browser.
+Cela démarrera le serveur, et vous pourrez jouer au jeu en visitant **http://localhost:3030** dans votre navigateur.
 
-### Running Tests
+---
 
-This project uses Jest for testing. To run the tests, use the following command:
+### Exécuter les tests
+
+Ce projet utilise **Jest** pour les tests unitaires et **Playwright** pour les tests d'intégration. Pour lancer les tests, utilisez la commande suivante :
 
 ```bash
 npm test
 ```
 
-The tests are designed to ensure that the game logic works correctly and to demonstrate best practices in test-driven development.
+Les tests garantissent que la logique du jeu fonctionne correctement et démontrent les meilleures pratiques du développement piloté par les tests.
 
-## Project Structure
+---
 
-- **`game.js`**: Contains the core game logic.
-- **`tools.js`**: Utility functions used in the game.
-- **`test/`**: Contains test files for each module (e.g., `game.test.js`, `tools.test.js`).
-- **`index.js`**: Main server file that sets up the Express app and routes.
-- **`public/`**: Static files such as HTML, CSS, and client-side JavaScript.
-- **`views/`**: EJS templates used to render the game interface.
+## Structure du projet
+
+- **game.js** : Contient la logique principale du jeu.
+- **tools.js** : Fonctions utilitaires utilisées dans le jeu.
+- **test/** : Contient les fichiers de test pour chaque module (par exemple, `game.test.js`, `tools.test.js`).
+- **index.js** : Fichier principal qui configure l'application Express et les routes.
+- **public/** : Fichiers statiques tels que HTML, CSS et JavaScript côté client.
+- **views/** : Modèles **EJS** utilisés pour afficher l'interface du jeu.
+- **database.js** : Gère les interactions avec la base de données SQLite.
+- **style.css** : Feuille de style principale pour le jeu.
+- **words_fr.txt** : Liste des mots français pour le jeu.
+
+---
+
+## Aperçu
+
+### Structure des fichiers
+
+![Structure des fichiers](./mnt/data/image.png)
+
+### Présentation du jeu
+
+![Capture d'écran du jeu](./mnt/data/image.png)
